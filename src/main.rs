@@ -1,3 +1,14 @@
+use clap::Parser;
+use qr_encoder::Encoder;
+
+#[derive(Parser)]
+struct Cli {
+    data: String,
+}
+
 fn main() {
-    println!("Hello, world!");
+    let cli = Cli::parse();
+
+    let encoder = Encoder::new();
+    encoder.encode(&cli.data);
 }
