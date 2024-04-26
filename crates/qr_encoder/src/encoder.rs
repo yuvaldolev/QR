@@ -1,3 +1,5 @@
+use crate::data_analyzer::DataAnalyzer;
+
 pub struct Encoder;
 
 impl Encoder {
@@ -6,7 +8,8 @@ impl Encoder {
     }
 
     pub fn encode(&self, data: &str) {
-        println!("Encoding data: {data}");
+        let data_analyzer = DataAnalyzer::new();
+        data_analyzer.analyze(data);
     }
 }
 
