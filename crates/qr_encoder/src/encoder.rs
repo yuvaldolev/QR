@@ -1,24 +1,22 @@
-use crate::{data_analyzer::DataAnalyzer, data_encoders::DataEncoderFactory};
+use crate::{data_analyzer::DataAnalyzer, data_encoders::DataEncoderFactory, ErrorCorrectionLevel};
 
-pub struct Encoder;
+pub struct Encoder {
+    error_correction_level: ErrorCorrectionLevel,
+}
 
 impl Encoder {
-    pub fn new() -> Self {
-        Self
+    pub fn new(error_correction_level: ErrorCorrectionLevel) -> Self {
+        Self {
+            error_correction_level,
+        }
     }
 
     pub fn encode(&self, data: &str) {
         let data_analyzer = DataAnalyzer::new();
         let data_encoding = data_analyzer.analyze(data);
 
-        let data_encoder_factory = DataEncoderFactory::new();
+        let data_encoder_factory = DataEncoderFactory::new(self.error_correction_level.clone());
         let data_encoder = data_encoder_factory.make(&data_encoding);
         let encoded_data = data_encoder.encode(data);
-    }
-}
-
-impl Default for Encoder {
-    fn default() -> Self {
-        Self::new()
     }
 }

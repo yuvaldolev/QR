@@ -1,10 +1,16 @@
+use crate::ErrorCorrectionLevel;
+
 use super::data_encoder::DataEncoder;
 
-pub struct NumericDataEncoder;
+pub struct NumericDataEncoder {
+    error_correction_level: ErrorCorrectionLevel,
+}
 
 impl NumericDataEncoder {
-    pub fn new() -> Self {
-        Self
+    pub fn new(error_correction_level: ErrorCorrectionLevel) -> Self {
+        Self {
+            error_correction_level,
+        }
     }
 }
 
