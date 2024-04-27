@@ -1,23 +1,17 @@
-use crate::{data_encoding::DataEncoding, ErrorCorrectionLevel};
+use crate::data_encoding::DataEncoding;
 
 use super::{data_encoder::DataEncoder, numeric_data_encoder::NumericDataEncoder};
 
-pub struct DataEncoderFactory {
-    error_correction_level: ErrorCorrectionLevel,
-}
+pub struct DataEncoderFactory;
 
 impl DataEncoderFactory {
-    pub fn new(error_correction_level: ErrorCorrectionLevel) -> Self {
-        Self {
-            error_correction_level,
-        }
+    pub fn new() -> Self {
+        Self
     }
 
     pub fn make(&self, encoding: &DataEncoding) -> Box<dyn DataEncoder> {
         match encoding {
-            DataEncoding::Numeric => {
-                Box::new(NumericDataEncoder::new(self.error_correction_level.clone()))
-            }
+            DataEncoding::Numeric => Box::new(NumericDataEncoder::new()),
             DataEncoding::Alphanumeric => todo!(),
             DataEncoding::Byte => todo!(),
         }

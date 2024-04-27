@@ -1,21 +1,51 @@
-use crate::ErrorCorrectionLevel;
+use bitvec::{field::BitField, order::Msb0, vec::BitVec};
+use itertools::Itertools;
 
 use super::data_encoder::DataEncoder;
 
-pub struct NumericDataEncoder {
-    error_correction_level: ErrorCorrectionLevel,
-}
+const CHUNK_SIZE: usize = 3;
+
+pub struct NumericDataEncoder;
 
 impl NumericDataEncoder {
-    pub fn new(error_correction_level: ErrorCorrectionLevel) -> Self {
-        Self {
-            error_correction_level,
-        }
+    pub fn new() -> Self {
+        Self
+    }
+
+    fn encode_chunk(chunk: &str) -> BitVec<usize, Msb0> {
+        let number: u16 = chunk.parse().unwrap();
+
+        let mut encoded_chunk = bitvec::bitvec![usize, Msb0; 0; Self::get_bit_size(number)];
+        encoded_chunk.store(number);
+
+        encoded_chunk
+    }
+
+    fn get_bit_size(chunk: u16) -> usize {
+        let number_of_digits = if 0 == chunk {
+            1
+        } else {
+            ((chunk as f32).log10().floor()) as u32 + 1
+        };
+
+        let lower_bound = 10i32.pow(number_of_digits - 1);
+        let upper_bound = 10i32.pow(number_of_digits) - 1;
+
+        let number_of_distinct_values = (upper_bound - lower_bound) + 1;
+
+        (number_of_distinct_values as f32).log2().ceil() as usize
     }
 }
 
 impl DataEncoder for NumericDataEncoder {
-    fn encode(&self, data: &str) -> Vec<u8> {
-        Vec::new()
+    fn encode(&self, data: &str) -> BitVec<usize, Msb0> {
+        let mut encoded_data: BitVec<usize, Msb0> = BitVec::new();
+
+        for chunk in &data.chars().chunks(CHUNK_SIZE) {
+            let mut encoded_chunk = Self::encode_chunk(chunk.collect::<String>().as_str());
+            encoded_data.append(&mut encoded_chunk);
+        }
+
+        encoded_data
     }
 }

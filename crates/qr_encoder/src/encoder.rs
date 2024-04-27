@@ -15,8 +15,9 @@ impl Encoder {
         let data_analyzer = DataAnalyzer::new();
         let data_encoding = data_analyzer.analyze(data);
 
-        let data_encoder_factory = DataEncoderFactory::new(self.error_correction_level.clone());
+        let data_encoder_factory = DataEncoderFactory::new();
         let data_encoder = data_encoder_factory.make(&data_encoding);
         let encoded_data = data_encoder.encode(data);
+        println!("Encoded: {}", encoded_data);
     }
 }
