@@ -15,7 +15,10 @@ impl NumericDataEncoder {
     fn encode_chunk(chunk: &str) -> BitVec<usize, Msb0> {
         let number: u16 = chunk.parse().unwrap();
 
-        let mut encoded_chunk = bitvec::bitvec![usize, Msb0; 0; Self::get_bit_size(number)];
+        let mut encoded_chunk = bitvec::bitvec![
+            usize, Msb0;
+            0; Self::get_bit_size(number)
+        ];
         encoded_chunk.store(number);
 
         encoded_chunk

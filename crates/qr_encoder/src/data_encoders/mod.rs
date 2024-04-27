@@ -1,3 +1,4 @@
+mod alphanumeric_data_encoder;
 mod data_encoder;
 mod data_encoder_factory;
 mod numeric_data_encoder;
