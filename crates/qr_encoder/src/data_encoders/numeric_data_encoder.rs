@@ -12,14 +12,14 @@ impl NumericDataEncoder {
         Self
     }
 
-    fn encode_chunk(chunk: &str) -> BitVec<usize, Msb0> {
+    fn encode_chunk(chunk: &str) -> BitVec<u8, Msb0> {
         let number: u16 = chunk.parse().unwrap();
 
         let mut encoded_chunk = bitvec::bitvec![
-            usize, Msb0;
+            u8, Msb0;
             0; Self::get_bit_size(number)
         ];
-        encoded_chunk.store(number);
+        encoded_chunk.store_be(number);
 
         encoded_chunk
     }
@@ -41,8 +41,8 @@ impl NumericDataEncoder {
 }
 
 impl DataEncoder for NumericDataEncoder {
-    fn encode(&self, data: &str) -> BitVec<usize, Msb0> {
-        let mut encoded_data: BitVec<usize, Msb0> = BitVec::new();
+    fn encode(&self, data: &str) -> BitVec<u8, Msb0> {
+        let mut encoded_data: BitVec<u8, Msb0> = BitVec::new();
 
         for chunk in &data.chars().chunks(CHUNK_SIZE) {
             let mut encoded_chunk = Self::encode_chunk(chunk.collect::<String>().as_str());
@@ -72,19 +72,19 @@ mod tests {
 
     test_encode! {
         test_encode_full_chunks: "123456" -> bitvec::bitvec![
-            usize, Msb0;
+            u8, Msb0;
             0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0,
         ],
         test_encode_2_digit_last_chunk: "12345" -> bitvec::bitvec![
-            usize, Msb0;
+            u8, Msb0;
             0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1,
         ],
         test_encode_1_digit_last_chunk: "1234" -> bitvec::bitvec![
-            usize, Msb0;
+            u8, Msb0;
             0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 0,
         ],
         test_encode_partial_chunks_in_middle: "1230010120001" -> bitvec::bitvec![
-            usize, Msb0;
+            u8, Msb0;
             0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 1,
         ]

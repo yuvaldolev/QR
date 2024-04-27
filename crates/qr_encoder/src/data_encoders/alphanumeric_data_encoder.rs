@@ -21,7 +21,7 @@ impl AlphanumericDataEncoder {
         }
     }
 
-    fn encode_chunk(&self, chunk: &str) -> BitVec<usize, Msb0> {
+    fn encode_chunk(&self, chunk: &str) -> BitVec<u8, Msb0> {
         if CHUNK_SIZE == chunk.len() {
             self.encode_even_chunk(chunk)
         } else {
@@ -29,7 +29,7 @@ impl AlphanumericDataEncoder {
         }
     }
 
-    fn encode_even_chunk(&self, chunk: &str) -> BitVec<usize, Msb0> {
+    fn encode_even_chunk(&self, chunk: &str) -> BitVec<u8, Msb0> {
         let encoded_first_character = self
             .alphanumeric_encoding_table
             .get(chunk.chars().nth(0).unwrap())
@@ -42,28 +42,28 @@ impl AlphanumericDataEncoder {
         let encoded_number = ((encoded_first_character as u16) * FIRST_NUMBER_MULTIPLIER)
             + (encoded_second_character as u16);
 
-        let mut encoded_chunk = bitvec::bitvec![usize, Msb0; 0; EVEN_CHUNK_BIT_SIZE];
-        encoded_chunk.store(encoded_number);
+        let mut encoded_chunk = bitvec::bitvec![u8, Msb0; 0; EVEN_CHUNK_BIT_SIZE];
+        encoded_chunk.store_be(encoded_number);
 
         encoded_chunk
     }
 
-    fn encode_odd_chunk(&self, chunk: &str) -> BitVec<usize, Msb0> {
+    fn encode_odd_chunk(&self, chunk: &str) -> BitVec<u8, Msb0> {
         let encoded_number = self
             .alphanumeric_encoding_table
             .get(chunk.chars().nth(0).unwrap())
             .unwrap();
 
-        let mut encoded_chunk = bitvec::bitvec![usize, Msb0; 0; ODD_CHUNK_BIT_SIZE];
-        encoded_chunk.store(encoded_number);
+        let mut encoded_chunk = bitvec::bitvec![u8, Msb0; 0; ODD_CHUNK_BIT_SIZE];
+        encoded_chunk.store_be(encoded_number);
 
         encoded_chunk
     }
 }
 
 impl DataEncoder for AlphanumericDataEncoder {
-    fn encode(&self, data: &str) -> BitVec<usize, Msb0> {
-        let mut encoded_data: BitVec<usize, Msb0> = BitVec::new();
+    fn encode(&self, data: &str) -> BitVec<u8, Msb0> {
+        let mut encoded_data: BitVec<u8, Msb0> = BitVec::new();
 
         for chunk in &data.chars().chunks(CHUNK_SIZE) {
             let mut encoded_chunk = self.encode_chunk(chunk.collect::<String>().as_str());
@@ -93,13 +93,13 @@ mod tests {
 
     test_encode! {
         test_encode_characters: "HELLO WORLD" -> bitvec::bitvec![
-            usize, Msb0;
+            u8, Msb0;
             0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0,
             0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0,
             1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1,
         ],
         test_encode_characters_and_digits: "CHARACTER123AND456DIGIT" -> bitvec::bitvec![
-            usize, Msb0;
+            u8, Msb0;
             0, 1, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1,
             1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0,
@@ -108,7 +108,7 @@ mod tests {
             0, 1,
         ],
         test_encode_characters_digits_and_symbols: "C H$A%R*A+C-T.E/RS1:23" -> bitvec::bitvec![
-            usize, Msb0;
+            u8, Msb0;
             0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1,
             1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1,
             0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0,
@@ -116,11 +116,11 @@ mod tests {
             0, 0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1,
         ],
         test_encode_even: "AB12" -> bitvec::bitvec![
-            usize, Msb0;
+            u8, Msb0;
             0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1,
         ],
         test_encode_odd: "AB12C" -> bitvec::bitvec![
-            usize, Msb0;
+            u8, Msb0;
             0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 1,
             1, 0, 0,
         ]

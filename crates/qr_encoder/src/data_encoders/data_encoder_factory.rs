@@ -1,8 +1,8 @@
 use crate::data_encoding::DataEncoding;
 
 use super::{
-    alphanumeric_data_encoder::AlphanumericDataEncoder, data_encoder::DataEncoder,
-    numeric_data_encoder::NumericDataEncoder,
+    alphanumeric_data_encoder::AlphanumericDataEncoder, byte_data_encoder::ByteDataEncoder,
+    data_encoder::DataEncoder, numeric_data_encoder::NumericDataEncoder,
 };
 
 pub struct DataEncoderFactory;
@@ -16,7 +16,7 @@ impl DataEncoderFactory {
         match encoding {
             DataEncoding::Numeric => Box::new(NumericDataEncoder::new()),
             DataEncoding::Alphanumeric => Box::new(AlphanumericDataEncoder::new()),
-            DataEncoding::Byte => todo!(),
+            DataEncoding::Byte => Box::new(ByteDataEncoder::new()),
         }
     }
 }

@@ -63,7 +63,7 @@ mod tests {
         test_analyze_byte_lowercase_and_uppercase_characters_and_digits:
             "12ab34CD56" -> DataEncoding::Byte,
         test_analyze_byte_unicode: "שלום עולם 😀" -> DataEncoding::Byte,
-        test_analyze_uppercase_characters_digits_and_symbols_not_in_alphanumeric_table:
+        test_analyze_byte_uppercase_characters_digits_and_symbols_not_in_alphanumeric_table:
             "C H$A%R*A+C-T.E/RS1:23!" -> DataEncoding::Byte
     }
 }
