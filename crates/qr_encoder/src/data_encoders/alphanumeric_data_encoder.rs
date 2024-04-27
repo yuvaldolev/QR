@@ -66,9 +66,7 @@ impl DataEncoder for AlphanumericDataEncoder {
         let mut encoded_data: BitVec<usize, Msb0> = BitVec::new();
 
         for chunk in &data.chars().chunks(CHUNK_SIZE) {
-            let chunk = chunk.collect::<String>();
-            let mut encoded_chunk = self.encode_chunk(chunk.clone().as_str());
-            println!("chunk: {}, encoded: {}", chunk, encoded_chunk);
+            let mut encoded_chunk = self.encode_chunk(chunk.collect::<String>().as_str());
             encoded_data.append(&mut encoded_chunk);
         }
 

@@ -52,3 +52,41 @@ impl DataEncoder for NumericDataEncoder {
         encoded_data
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    macro_rules! test_encode {
+        ($($name:ident: $data:literal -> $expected_encoded_data:expr),+) => {
+            $(
+                #[test]
+                fn $name() {
+                    let encoder = NumericDataEncoder::new();
+                    let encoded_data = encoder.encode($data);
+                    assert_eq!(encoded_data, $expected_encoded_data);
+                }
+            )+
+        };
+    }
+
+    test_encode! {
+        test_encode_full_chunks: "123456" -> bitvec::bitvec![
+            usize, Msb0;
+            0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0,
+        ],
+        test_encode_2_digit_last_chunk: "12345" -> bitvec::bitvec![
+            usize, Msb0;
+            0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1,
+        ],
+        test_encode_1_digit_last_chunk: "1234" -> bitvec::bitvec![
+            usize, Msb0;
+            0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 0,
+        ],
+        test_encode_partial_chunks_in_middle: "1230010120001" -> bitvec::bitvec![
+            usize, Msb0;
+            0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 1,
+        ]
+    }
+}
