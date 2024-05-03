@@ -1,4 +1,7 @@
-use crate::{data_analyzer::DataAnalyzer, segment_encoder::SegmentEncoder, ErrorCorrectionLevel};
+use crate::{
+    data_analyzer::DataAnalyzer, error, segment_encoder::SegmentEncoder,
+    version_analyzer::VersionAnalyzer, ErrorCorrectionLevel,
+};
 
 pub struct Encoder {
     error_correction_level: ErrorCorrectionLevel,
@@ -17,11 +20,16 @@ impl Encoder {
         }
     }
 
-    pub fn encode(&self, data: &str) {
+    pub fn encode(&self, data: &str) -> error::Result<()> {
         let data_encoding = self.data_analyzer.analyze(data);
-        let version =
-            self.version_analyzer
-                .analyze(data.len(), data_encoding, self.error_correction_level);
-        let segment = self.segment_encoder.encode(data, &data_encoding);
+        let version = self.version_analyzer.analyze(
+            data.len(),
+            &data_encoding,
+            &self.error_correction_level,
+        )?;
+        println!("version: {}", version);
+        // let segment = self.segment_encoder.encode(data, &data_encoding);
+
+        Ok(())
     }
 }

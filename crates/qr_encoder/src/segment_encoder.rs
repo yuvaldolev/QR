@@ -16,13 +16,15 @@ impl SegmentEncoder {
     }
 
     pub fn encode(&self, data: &str, encoding: &DataEncoding) -> Segment {
-        let segment_data: BitVec<u8, Msb0> = BitVec::new();
+        let mut segment_data: BitVec<u8, Msb0> = BitVec::new();
 
-        let encoded_mode_indicator = self.encode_mode_indicator(encoding);
+        let mut encoded_mode_indicator = self.encode_mode_indicator(encoding);
         segment_data.append(&mut encoded_mode_indicator);
 
         let data_encoder = self.data_encoder_factory.make(encoding);
         let encoded_data = data_encoder.encode(data);
+
+        Segment::new()
     }
 
     fn encode_mode_indicator(&self, encoding: &DataEncoding) -> BitVec<u8, Msb0> {
