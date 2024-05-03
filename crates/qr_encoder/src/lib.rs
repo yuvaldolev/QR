@@ -5,6 +5,9 @@ mod data_encoding;
 mod encoder;
 mod error;
 mod error_correction_level;
+mod segment;
+mod segment_encoder;
+mod version_analyzer;
 
 pub use encoder::Encoder;
 pub use error_correction_level::ErrorCorrectionLevel;

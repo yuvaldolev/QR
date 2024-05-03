@@ -1,23 +1,27 @@
-use crate::{data_analyzer::DataAnalyzer, data_encoders::DataEncoderFactory, ErrorCorrectionLevel};
+use crate::{data_analyzer::DataAnalyzer, segment_encoder::SegmentEncoder, ErrorCorrectionLevel};
 
 pub struct Encoder {
     error_correction_level: ErrorCorrectionLevel,
+    data_analyzer: DataAnalyzer,
+    version_analyzer: VersionAnalyzer,
+    segment_encoder: SegmentEncoder,
 }
 
 impl Encoder {
     pub fn new(error_correction_level: ErrorCorrectionLevel) -> Self {
         Self {
             error_correction_level,
+            data_analyzer: DataAnalyzer::new(),
+            version_analyzer: VersionAnalyzer::new(),
+            segment_encoder: SegmentEncoder::new(),
         }
     }
 
     pub fn encode(&self, data: &str) {
-        let data_analyzer = DataAnalyzer::new();
-        let data_encoding = data_analyzer.analyze(data);
-
-        let data_encoder_factory = DataEncoderFactory::new();
-        let data_encoder = data_encoder_factory.make(&data_encoding);
-        let encoded_data = data_encoder.encode(data);
-        println!("Encoded: {}", encoded_data);
+        let data_encoding = self.data_analyzer.analyze(data);
+        let version =
+            self.version_analyzer
+                .analyze(data.len(), data_encoding, self.error_correction_level);
+        let segment = self.segment_encoder.encode(data, &data_encoding);
     }
 }
