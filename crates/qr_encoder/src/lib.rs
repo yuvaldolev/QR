@@ -7,6 +7,7 @@ mod error;
 mod error_correction_level;
 mod segment;
 mod segment_encoder;
+mod version;
 mod version_analyzer;
 
 pub use encoder::Encoder;

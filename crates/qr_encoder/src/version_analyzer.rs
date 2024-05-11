@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{data_encoding::DataEncoding, error, ErrorCorrectionLevel};
+use crate::{data_encoding::DataEncoding, error, version::Version, ErrorCorrectionLevel};
 
 const NUMBER_OF_SUPPORTED_VERSIONS: usize = 40;
 
@@ -20,7 +20,7 @@ impl VersionAnalyzer {
         data_length: usize,
         data_encoding: &DataEncoding,
         error_correction_level: &ErrorCorrectionLevel,
-    ) -> error::Result<u8> {
+    ) -> error::Result<Version> {
         for (index, version_character_capacities) in
             self.version_character_capacities.iter().enumerate()
         {
@@ -31,7 +31,7 @@ impl VersionAnalyzer {
                     .get(data_encoding)
                     .unwrap())
             {
-                return Ok((index + 1) as u8);
+                return Ok(Version::new((index + 1) as u8));
             }
         }
 
@@ -89,9 +89,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_1_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -120,9 +121,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_2_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -151,9 +153,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_3_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -182,9 +185,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_4_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -213,9 +217,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_5_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -244,9 +249,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_6_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -275,9 +281,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_7_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -306,9 +313,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_8_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -337,9 +345,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_9_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -368,9 +377,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_10_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -399,9 +409,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_11_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -430,9 +441,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_12_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -461,9 +473,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_13_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -492,9 +505,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_14_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -523,9 +537,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_15_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -554,9 +569,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_16_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -585,9 +601,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_17_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -616,9 +633,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_18_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -647,9 +665,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_19_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -678,9 +697,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_20_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -709,9 +729,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_21_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -740,9 +761,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_22_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -771,9 +793,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_23_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -802,9 +825,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_24_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -833,9 +857,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_25_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -864,9 +889,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_26_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -895,9 +921,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_27_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -926,9 +953,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_28_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -957,9 +985,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_29_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -988,9 +1017,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_30_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -1019,9 +1049,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_31_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -1050,9 +1081,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_32_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -1081,9 +1113,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_33_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -1112,9 +1145,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_34_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -1143,9 +1177,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_35_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -1174,9 +1209,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_36_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -1205,9 +1241,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_37_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -1236,9 +1273,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_38_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -1267,9 +1305,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_39_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -1298,9 +1337,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_40_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
     ) {
         Self::insert_version_character_capacities(
             version_character_capacities,
@@ -1329,9 +1369,10 @@ impl VersionAnalyzer {
     }
 
     fn insert_version_character_capacities(
-        version_character_capacities: &mut Vec<
-            HashMap<ErrorCorrectionLevel, HashMap<DataEncoding, usize>>,
-        >,
+        version_character_capacities: &mut [HashMap<
+            ErrorCorrectionLevel,
+            HashMap<DataEncoding, usize>,
+        >],
         version: usize,
         low: [(DataEncoding, usize); 3],
         medium: [(DataEncoding, usize); 3],

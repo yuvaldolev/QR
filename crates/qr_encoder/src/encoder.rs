@@ -27,8 +27,7 @@ impl Encoder {
             &data_encoding,
             &self.error_correction_level,
         )?;
-        println!("version: {}", version);
-        // let segment = self.segment_encoder.encode(data, &data_encoding);
+        let segment = self.segment_encoder.encode(data, &version, &data_encoding);
 
         Ok(())
     }
