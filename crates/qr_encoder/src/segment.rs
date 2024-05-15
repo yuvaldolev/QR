@@ -1,22 +1,36 @@
-use bitvec::{order::Msb0, vec::BitVec};
+use crate::{data_encoding::DataEncoding, version::Version};
 
-use crate::{
-    data_analyzer::DataAnalyzer, data_encoders::DataEncoderFactory, data_encoding::DataEncoding,
-};
-
-pub struct Segment {}
+pub struct Segment {
+    start: usize,
+    end: usize,
+    encoding: DataEncoding,
+}
 
 impl Segment {
-    pub fn new() -> Self {
-        // let data_encoder_factory = DataEncoderFactory::new();
-        // let data_encoder = data_encoder_factory.make(&encoding);
-        // let encoded_data = data_encoder.encode(data);
-        //
-        // Segment {
-        //     encoding,
-        //     character_count: data.len(),
-        //     data: encoded_data,
-        // }
-        Segment {}
+    pub fn new(start: usize, end: usize, encoding: DataEncoding) -> Self {
+        Segment {
+            encoding,
+            start,
+            end,
+        }
+    }
+
+    pub fn slice<'a>(&self, data: &'a str) -> &'a str {
+        &data[self.start..self.end]
+    }
+
+    pub fn get_encoding(&self) -> &DataEncoding {
+        &self.encoding
+    }
+
+    pub fn encoded_length(&self, version: &Version) -> usize {
+        let character_count = self.end - self.start;
+
+        let mode_indicator_bit_size = version.get_mode_indicator_bit_size();
+        let character_count_indicator_bit_size =
+            version.get_character_count_indicator_bit_size(&self.encoding);
+        let data_bit_size = self.encoding.get_data_bit_size(character_count);
+
+        mode_indicator_bit_size + character_count_indicator_bit_size + data_bit_size
     }
 }

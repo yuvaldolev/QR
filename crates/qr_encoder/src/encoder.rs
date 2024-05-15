@@ -1,6 +1,8 @@
+use bitvec::{order::Msb0, vec::BitVec};
+
 use crate::{
-    data_analyzer::DataAnalyzer, error, segment_encoder::SegmentEncoder,
-    version_analyzer::VersionAnalyzer, ErrorCorrectionLevel,
+    data_analyzer::DataAnalyzer, error, segment::Segment, segment_encoder::SegmentEncoder,
+    version::Version, version_analyzer::VersionAnalyzer, ErrorCorrectionLevel,
 };
 
 pub struct Encoder {
@@ -21,14 +23,29 @@ impl Encoder {
     }
 
     pub fn encode(&self, data: &str) -> error::Result<()> {
-        let data_encoding = self.data_analyzer.analyze(data);
-        let version = self.version_analyzer.analyze(
-            data.len(),
-            &data_encoding,
-            &self.error_correction_level,
-        )?;
-        let segment = self.segment_encoder.encode(data, &version, &data_encoding);
+        let segments = self.data_analyzer.analyze(data);
+        let version = self
+            .version_analyzer
+            .analyze(&segments, self.error_correction_level)?;
+
+        let encoded_segments = self.encode_segments(&segments, data, &version);
 
         Ok(())
+    }
+
+    fn encode_segments(
+        &self,
+        segments: &[Segment],
+        data: &str,
+        version: &Version,
+    ) -> BitVec<u8, Msb0> {
+        let mut encoded_segments: BitVec<u8, Msb0> = BitVec::new();
+
+        for segment in segments {
+            let mut encoded_segment = self.segment_encoder.encode(segment, data, version);
+            encoded_segments.append(&mut encoded_segment);
+        }
+
+        encoded_segments
     }
 }

@@ -1,4 +1,7 @@
-use crate::{alphanumeric_encoding_table::AlphanumericEncodingTable, data_encoding::DataEncoding};
+use crate::{
+    alphanumeric_encoding_table::AlphanumericEncodingTable, data_encoding::DataEncoding,
+    segment::Segment,
+};
 
 pub struct DataAnalyzer {
     alphanumeric_encoding_table: AlphanumericEncodingTable,
@@ -11,14 +14,21 @@ impl DataAnalyzer {
         }
     }
 
-    pub fn analyze(&self, data: &str) -> DataEncoding {
-        if Self::is_numeric_encodable(data) {
+    pub fn analyze(&self, data: &str) -> Vec<Segment> {
+        // TODO: Optimize data segmentation and return multiple segments with most
+        // efficient encoding per-segment.
+        //
+        // TODO: Kanji encoding support.
+
+        let encoding = if Self::is_numeric_encodable(data) {
             DataEncoding::Numeric
         } else if self.is_alphanumeric_encodable(data) {
             DataEncoding::Alphanumeric
         } else {
             DataEncoding::Byte
-        }
+        };
+
+        vec![Segment::new(0, data.len(), encoding)]
     }
 
     fn is_numeric_encodable(data: &str) -> bool {
@@ -41,8 +51,14 @@ mod tests {
                 #[test]
                 fn $name() {
                     let data_analyzer = DataAnalyzer::new();
-                    let data_encoding = data_analyzer.analyze($data);
-                    assert_eq!(data_encoding, $expected_data_encoding);
+                    let segments = data_analyzer.analyze($data);
+
+                    assert_eq!(segments.len(), 1);
+
+                    let segment = &segments[0];
+                    assert_eq!(segment.get_start(), 0);
+                    assert_eq!(segment.get_end(), $data.len());
+                    assert_eq!(segment.get_encoding(), &$expected_data_encoding);
                 }
             )+
         };

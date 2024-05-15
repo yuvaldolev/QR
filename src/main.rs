@@ -4,9 +4,11 @@ use qr_encoder::Encoder;
 
 mod cli;
 
-fn main() {
+fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
     let encoder = Encoder::new(cli.error_correction_level.into_error_correction_level());
-    encoder.encode(&cli.data);
+    encoder.encode(&cli.data)?;
+
+    Ok(())
 }

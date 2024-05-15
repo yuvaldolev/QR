@@ -13,4 +13,12 @@ impl DataEncoding {
             DataEncoding::Byte => 0b0100,
         }
     }
+
+    pub fn get_data_bit_size(&self, character_count: usize) -> usize {
+        match self {
+            DataEncoding::Numeric => ((character_count * 10) + 2) / 3,
+            DataEncoding::Alphanumeric => ((character_count * 11) + 1) / 2,
+            DataEncoding::Byte => character_count * 8,
+        }
+    }
 }
