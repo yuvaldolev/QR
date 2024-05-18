@@ -16,7 +16,7 @@ async fn function_handler(event: LambdaEvent<Request>) -> Result<Response, Error
     // Prepare the response
     let resp = Response {
         statusCode: 200,
-        body: "Hello World from Rust!".to_string(),
+        body: "Updated Hello World from Rust!".to_string(),
     };
 
     // Return `Response` (it will be serialized to JSON automatically by the runtime)
