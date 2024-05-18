@@ -1,0 +1,50 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  AWS_REGION: eu-central-1
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+
+      - uses: aws-actions/setup-sam@v1
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Zig toolchain
+        uses: korandoru/setup-zig@v1
+        with:
+          zig-version: 0.10.0
+
+      - name: Install Cargo Lambda
+        uses: jaxxstorm/action-install-gh-release@v1.9.0
+        with:
+          repo: cargo-lambda/cargo-lambda
+          platform: linux
+          arch: x86_64
+
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ env.AWS_REGION }}
+
+      - run: sam build
+
+      - run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --capabilities CAPABILITY_IAM --region ${{ env.AWS_REGION }}
+
