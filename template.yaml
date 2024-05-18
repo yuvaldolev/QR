@@ -7,7 +7,6 @@ Globals:
     Timeout: 3
     MemorySize: 128
 
-
 Resources:
   QrEncodeEntryFunction:
     Type: AWS::Serverless::Function
