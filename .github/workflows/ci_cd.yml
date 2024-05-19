@@ -17,11 +17,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
 
-      - uses: actions/setup-python@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
 
-      - uses: aws-actions/setup-sam@v1
+      - name: Setup AWS SAM
+        uses: aws-actions/setup-sam@v1
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -38,13 +41,22 @@ jobs:
           platform: linux
           arch: x86_64
 
-      - uses: aws-actions/configure-aws-credentials@v1
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{ env.AWS_REGION }}
 
-      - run: sam build
+      - name: Build
+        run: sam build
 
-      - run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset
+      - name: Deploy
+        run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset
 
+      - name: Retrieve QR Encode API URL
+        run: |
+          QR_ENCODE_API_URL=$(sam list stack-outputs --output json | jq '.[] | select(.OutputKey == "QrEncodeApi") | .OutputValue')
+          echo "QR_ENCODE_API_URL=$QR_ENCODE_API_URL" >> $GITHUB_ENV
+
+      - run: echo "QrEncodeApi - ${{ env.QR_ENCODE_API_URL }}"
