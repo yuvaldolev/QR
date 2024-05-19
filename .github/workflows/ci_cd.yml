@@ -48,10 +48,10 @@ jobs:
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Build
+      - name: Build Backend
         run: sam build
 
-      - name: Deploy
+      - name: Deploy Backend
         run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset
 
       - name: Retrieve QR Encode API URL
@@ -60,3 +60,14 @@ jobs:
           echo "QR_ENCODE_API_URL=$QR_ENCODE_API_URL" >> $GITHUB_ENV
 
       - run: echo "QrEncodeApi - ${{ env.QR_ENCODE_API_URL }}"
+
+      - name: Build CLI Frontend
+        env:
+          QR_ENCODE_API_URL: ${{ env.QR_ENCODE_API_URL }}
+        run: cargo build -p qr_cli --release
+
+      - name: Upload CLI Frontend Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: qr_cli
+          path: target/release/qr_cli
