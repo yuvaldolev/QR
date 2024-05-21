@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 jobs:
-  build-deploy:
+  build-deploy-backend:
     runs-on: ubuntu-latest
 
     steps:
@@ -56,18 +56,62 @@ jobs:
 
       - name: Retrieve QR Encode API URL
         run: |
-          QR_ENCODE_API_URL=$(sam list stack-outputs --output json | jq '.[] | select(.OutputKey == "EncodeApiUrl") | .OutputValue')
+          QR_ENCODE_API_URL=$(sam list stack-outputs --output json | jq '.[] | select(.OutputKey == "QrEncodeApiUrl") | .OutputValue')
           echo "QR_ENCODE_API_URL=$QR_ENCODE_API_URL" >> $GITHUB_ENV
 
-      - run: echo "QrEncodeApi - ${{ env.QR_ENCODE_API_URL }}"
+      - name: Print QR Encode API URL
+        run: echo "QR encode API URL - ${{ env.QR_ENCODE_API_URL }}"
+      
+      - name: Save QR Encode API URL
+        run: echo "${{ env.QR_ENCODE_API_URL }}" > qr_encode_api_url.txt
+
+      - name: Upload QR Encode API URL
+        uses: actions/upload-artifact@v4
+        with:
+          name: qr_encode_api_url
+          path: qr_encode_api_url.txt
+
+  build-upload-frontend:
+    needs: build-deploy-backend
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Download QR Encode API URL
+        uses: actions/download-artifact@v4
+        with:
+          name: qr_encode_api_url
+
+      - name: Read QR Encode API URL into environment
+        run: |
+          QR_ENCODE_API_URL=$(cat qr_encode_api_url.txt)
+          echo "QR_ENCODE_API_URL=$QR_ENCODE_API_URL" >> $GITHUB_ENV
 
       - name: Build CLI Frontend
         env:
           QR_ENCODE_API_URL: ${{ env.QR_ENCODE_API_URL }}
         run: cargo build -p qr_cli --release
 
-      - name: Upload CLI Frontend Artifact
-        uses: actions/upload-artifact@v2
+      - name: Upload CLI Frontend Artifact for Linux
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        uses: actions/upload-artifact@v4
         with:
           name: qr_cli
-          path: target/release/qr_cli
+          path: target/release/qr_cli_linux
+
+      - name: Upload CLI Frontend Artifact for macOS
+        if: ${{ matrix.os == 'macos-latest' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: qr_cli
+          path: target/release/qr_cli_macos
