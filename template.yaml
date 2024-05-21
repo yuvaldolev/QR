@@ -2,12 +2,25 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: qr
 
+Parameters:
+  Environment:
+    Type: String
+    AllowedValues:
+      - stage
+      - prod
+
 Globals:
   Function:
     Timeout: 3
     MemorySize: 128
 
 Resources:
+  QrApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub "${AWS::StackName}-ApiGatewayApi"
+      StageName: !Ref Environment
+
   QrEncodeEntryFunction:
     Type: AWS::Serverless::Function
     Metadata:
@@ -15,6 +28,7 @@ Resources:
       BuildProperties:
         Binary: qr_encode_entry_function
     Properties:
+      FunctionName: !Sub "${AWS::StackName}-QrEncodeEntryFunction"
       CodeUri: ./
       Handler: bootstrap
       Runtime: provided.al2
@@ -24,10 +38,11 @@ Resources:
         Encode:
           Type: Api 
           Properties:
+            RestApiId: !Ref QrApi
             Path: /encode
             Method: post
 
 Outputs:
-  QrEncodeApi:
-    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/encode/"
+  QrEncodeApiUrl:
+    Description: "API Gateway endpoint URL for QR encoding"
+    Value: !Sub "https://${QrApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}/encode"

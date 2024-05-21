@@ -56,7 +56,7 @@ jobs:
 
       - name: Retrieve QR Encode API URL
         run: |
-          QR_ENCODE_API_URL=$(sam list stack-outputs --output json | jq '.[] | select(.OutputKey == "QrEncodeApi") | .OutputValue')
+          QR_ENCODE_API_URL=$(sam list stack-outputs --output json | jq '.[] | select(.OutputKey == "EncodeApiUrl") | .OutputValue')
           echo "QR_ENCODE_API_URL=$QR_ENCODE_API_URL" >> $GITHUB_ENV
 
       - run: echo "QrEncodeApi - ${{ env.QR_ENCODE_API_URL }}"
