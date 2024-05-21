@@ -1,7 +1,7 @@
 # QR
 QR encoder and decoder written in Rust
 
-## TODO:
+## TODO
 - [x] Create prod and stage environments: see [this page](https://stackoverflow.com/questions/68826108/how-to-deploy-to-different-environments-with-aws-sam) and [this page](https://stackoverflow.com/questions/60889263/manage-stage-and-prod-environments-in-aws-sam-cloudformation-template-along-with) for more details
 - [x] Separate the frontend and backend CI/CD into two different jobs in the same pipeline which depend on each other (frontend depends on backend)
       build backend for linux only and frontend for Linux and macOS. Upload the built frontend for each platform as an Artifact
