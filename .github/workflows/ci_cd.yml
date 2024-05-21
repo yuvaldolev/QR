@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
 
 env:
   AWS_REGION: eu-central-1
@@ -48,11 +51,21 @@ jobs:
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Build Backend
+      - name: Build Backend - Stage
+        if: github.event_name == 'push'
         run: sam build
 
-      - name: Deploy Backend
+      - name: Build Backend - Prod
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        run: sam build --config-env prod
+
+      - name: Deploy Backend - Stage
+        if: github.event_name == 'push'
         run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset
+
+      - name: Deploy Backend - Prod
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        run: sam deploy --config-env prod --no-confirm-changeset --no-fail-on-empty-changeset
 
       - name: Retrieve QR Encode API URL
         run: |
@@ -87,6 +100,15 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Determine OS Name
+        run: |
+          if [[ ${{ matrix.os }} == 'ubuntu-latest' ]]; then
+            OS_NAME=linux
+          elif [[ ${{ matrix.os }} == 'macos-latest' ]]; then
+            OS_NAME=macos
+          fi
+          echo "OS_NAME=$OS_NAME" >> $GITHUB_ENV
+
       - name: Download QR Encode API URL
         uses: actions/download-artifact@v4
         with:
@@ -102,16 +124,47 @@ jobs:
           QR_ENCODE_API_URL: ${{ env.QR_ENCODE_API_URL }}
         run: cargo build -p qr_cli --release
 
-      - name: Upload CLI Frontend Artifact for Linux
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: qr_cli
-          path: target/release/qr_cli_linux
+      - name: Prepare CLI Frontend for Upload
+        run: cp target/release/qr_cli qr_cli_${{ env.OS_NAME }}
 
-      - name: Upload CLI Frontend Artifact for macOS
-        if: ${{ matrix.os == 'macos-latest' }}
+      - name: Upload CLI Frontend Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: qr_cli
-          path: target/release/qr_cli_macos
+          name: qr_cli_${{ env.OS_NAME }}
+          path: qr_cli_${{ env.OS_NAME }}
+
+  release:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+
+    needs: build-upload-frontend
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Download QR CLI Frontend Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: qr_cli
+          pattern: qr_cli_*
+          merge-multiple: true
+
+      - name: Determine Release Name
+        run: |
+          RELEASE_NAME=$(date +'%Y%m%d').$(git rev-parse --short ${{ github.sha }}).${{ github.run_number }}
+          echo "RELEASE_NAME=$RELEASE_NAME" >> $GITHUB_ENV
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.RELEASE_NAME }}
+          files: |
+            qr_cli/qr_cli_linux
+            qr_cli/qr_cli_macos
+
+
