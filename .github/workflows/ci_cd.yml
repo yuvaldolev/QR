@@ -67,9 +67,16 @@ jobs:
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: sam deploy --config-env prod --no-confirm-changeset --no-fail-on-empty-changeset
 
-      - name: Retrieve QR Encode API URL
+      - name: Retrieve QR Encode API URL - Stage
+        if: github.event_name == 'push'
         run: |
           QR_ENCODE_API_URL=$(sam list stack-outputs --output json | jq '.[] | select(.OutputKey == "QrEncodeApiUrl") | .OutputValue')
+          echo "QR_ENCODE_API_URL=$QR_ENCODE_API_URL" >> $GITHUB_ENV
+
+      - name: Retrieve QR Encode API URL - Prod
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        run: |
+          QR_ENCODE_API_URL=$(sam list stack-outputs --config-env prod --output json | jq '.[] | select(.OutputKey == "QrEncodeApiUrl") | .OutputValue')
           echo "QR_ENCODE_API_URL=$QR_ENCODE_API_URL" >> $GITHUB_ENV
 
       - name: Print QR Encode API URL
