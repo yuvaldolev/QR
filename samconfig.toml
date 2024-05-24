@@ -2,13 +2,13 @@ version = 0.1
 
 [default]
 [default.global.parameters]
-stack_name = "qr-backend-stage"
+stack_name = "qr-backend-dev"
 
 [default.build.parameters]
 cached = true
 parallel = true
 beta_features = true
-parameter_overrides = "Environment=stage"
+parameter_overrides = "Environment=dev"
 
 [default.validate.parameters]
 lint = true
@@ -17,10 +17,10 @@ lint = true
 capabilities = "CAPABILITY_IAM"
 confirm_changeset = true
 resolve_s3 = true
-s3_prefix = "qr-backend/stage"
+s3_prefix = "qr-backend/dev"
 region = "eu-central-1"
 image_repositories = []
-parameter_overrides = "Environment=stage"
+parameter_overrides = "Environment=dev"
 
 [default.package.parameters]
 resolve_s3 = true
@@ -33,6 +33,41 @@ beta_features = true
 warm_containers = "EAGER"
 
 [default.local_start_lambda.parameters]
+warm_containers = "EAGER"
+
+[stage]
+[stage.global.parameters]
+stack_name = "qr-backend-stage"
+
+[stage.build.parameters]
+cached = true
+parallel = true
+beta_features = true
+parameter_overrides = "Environment=stage"
+
+[stage.validate.parameters]
+lint = true
+
+[stage.deploy.parameters]
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = true
+resolve_s3 = true
+s3_prefix = "qr-backend/stage"
+region = "eu-central-1"
+image_repositories = []
+parameter_overrides = "Environment=stage"
+
+[stage.package.parameters]
+resolve_s3 = true
+
+[stage.sync.parameters]
+watch = true
+beta_features = true
+
+[stage.local_start_api.parameters]
+warm_containers = "EAGER"
+
+[stage.local_start_lambda.parameters]
 warm_containers = "EAGER"
 
 [prod]

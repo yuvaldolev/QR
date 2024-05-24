@@ -53,7 +53,7 @@ jobs:
 
       - name: Build Backend - Stage
         if: github.event_name == 'push'
-        run: sam build
+        run: sam build --config-env stage
 
       - name: Build Backend - Prod
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
@@ -61,7 +61,7 @@ jobs:
 
       - name: Deploy Backend - Stage
         if: github.event_name == 'push'
-        run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset
+        run: sam deploy --config-env stage --no-confirm-changeset --no-fail-on-empty-changeset
 
       - name: Deploy Backend - Prod
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
@@ -70,7 +70,7 @@ jobs:
       - name: Retrieve QR Encode API URL - Stage
         if: github.event_name == 'push'
         run: |
-          QR_ENCODE_API_URL=$(sam list stack-outputs --output json | jq '.[] | select(.OutputKey == "QrEncodeApiUrl") | .OutputValue')
+          QR_ENCODE_API_URL=$(sam list stack-outputs --config-env stage --output json | jq '.[] | select(.OutputKey == "QrEncodeApiUrl") | .OutputValue')
           echo "QR_ENCODE_API_URL=$QR_ENCODE_API_URL" >> $GITHUB_ENV
 
       - name: Retrieve QR Encode API URL - Prod
