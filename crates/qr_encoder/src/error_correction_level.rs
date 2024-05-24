@@ -1,4 +1,6 @@
-#[derive(Copy, Clone, Eq, Hash, PartialEq)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Copy, Clone, Deserialize, Eq, Hash, PartialEq, Serialize)]
 #[repr(usize)]
 pub enum ErrorCorrectionLevel {
     Low = 0,

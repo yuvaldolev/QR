@@ -1,9 +1,12 @@
-use lambda_runtime::{run, service_fn, Error, LambdaEvent};
+use lambda_runtime::{Error, LambdaEvent, tracing};
 
+use qr_encoder::ErrorCorrectionLevel;
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize)]
 struct Request {
+    data: String,
+    error_correction_level: ErrorCorrectionLevel,
 }
 
 #[derive(Serialize)]
@@ -25,10 +28,8 @@ async fn function_handler(event: LambdaEvent<Request>) -> Result<Response, Error
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::INFO)
-        .without_time()
-        .init();
+    tracing::init_default_subscriber();
 
-    run(service_fn(function_handler)).await
+    let function = lambda_runtime::service_fn(function_handler);
+    lambda_runtime::run(function).await
 }

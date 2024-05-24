@@ -4,11 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-lambda_runtime = "0.6.0"
+lambda_runtime = "0.11.2"
 qr_encoder = { path = "../qr_encoder" }
-serde = "1.0.136"
+serde = { version = "1.0.202", features = ["derive"] }
 tokio = { version = "1", features = ["macros"] }
-tracing = { version = "0.1", features = ["log"] }
-tracing-subscriber = { version = "0.3", default-features = false, features = [
-  "fmt",
-] }
