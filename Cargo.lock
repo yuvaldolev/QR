@@ -1603,7 +1603,21 @@ dependencies = [
  "aws-sdk-sqs",
  "aws_lambda_events",
  "lambda_runtime",
+ "qr_encode_result_function",
  "qr_encoder",
+ "qr_error",
+ "serde",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
+name = "qr_encode_result_function"
+version = "0.1.0"
+dependencies = [
+ "aws-config",
+ "aws-sdk-sqs",
+ "lambda_runtime",
  "qr_error",
  "serde",
  "serde_json",

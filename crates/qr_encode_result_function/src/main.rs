@@ -8,18 +8,17 @@ use aws_lambda_events::{
 use lambda_runtime::{tracing, Error, LambdaEvent};
 use qr_encode_entry_function::{QrEncodeEntryFunction, QrEncodeRequest};
 
-async fn try_handle(event: LambdaEvent<ApiGatewayProxyRequest>) -> anyhow::Result<String> {
+async fn try_handle(event: LambdaEvent<ApiGatewayProxyRequest>) -> Result<String, Error> {
     let (proxy_request, _) = event.into_parts();
 
     let proxy_request_body = proxy_request.body.unwrap();
 
-    let aws_configuration = aws_config::load_from_env().await;
-    let queue_url = env::var("QUEUE_URL")?;
-
-    let function = QrEncodeEntryFunction::new(aws_configuration, queue_url);
-
     let request: QrEncodeRequest = serde_json::from_str(&proxy_request_body)?;
-    let response = function.run(request).await?;
+    let aws_configuration = aws_config::load_from_env().await;
+    let sqs_url = env::var("SQS_URL")?;
+
+    let function = QrEncodeEntryFunction::new(request, aws_configuration, sqs_url);
+    let response = function.run().await?;
 
     let response_json = serde_json::to_string(&response)?;
 
@@ -32,7 +31,7 @@ async fn function_handler(
     let (status_code, body) = match try_handle(event).await {
         Ok(response) => (200, response),
         Err(e) => {
-            tracing::error!("Failed to handle request: {:#}", e);
+            tracing::error!("Failed to handle request: {e}");
             (500, String::from("Internal Server Error"))
         }
     };
