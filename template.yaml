@@ -10,11 +10,18 @@ Parameters:
       - stage
       - prod
 
+Conditions:
+  IsDev: !Equals [!Ref Environment, "dev"]
+
 Globals:
   Function:
     Timeout: 3
     MemorySize: 128
     Tracing: Active
+    Environment:
+      Variables:
+        RUST_BACKTRACE: !If [IsDev, "1", "0"]
+        AWS_LAMBDA_LOG_LEVEL: !If [IsDev, "trace", "info"]
   Api:
     TracingEnabled: true
 
@@ -44,7 +51,6 @@ Resources:
       Environment:
         Variables:
           SQS_URL: !Ref QrEncodeEntrySqs
-          AWS_LAMBDA_LOG_LEVEL: trace
       Policies:
         - SQSSendMessagePolicy:
             QueueName: !GetAtt QrEncodeEntrySqs.QueueName
