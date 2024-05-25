@@ -14,6 +14,9 @@ Globals:
   Function:
     Timeout: 3
     MemorySize: 128
+    Tracing: Active
+  Api:
+    TracingEnabled: true
 
 Resources:
   QrApi:
@@ -21,6 +24,9 @@ Resources:
     Properties:
       Name: !Sub "${AWS::StackName}-ApiGatewayApi"
       StageName: !Ref Environment
+
+  QrEncodeEntrySqs:
+    Type: AWS::SQS::Queue
 
   QrEncodeEntryFunction:
     Type: AWS::Serverless::Function
@@ -34,7 +40,14 @@ Resources:
       Handler: bootstrap
       Runtime: provided.al2
       Architectures:
-        - x86_64
+        - arm64
+      Environment:
+        Variables:
+          SQS_URL: !Ref QrEncodeEntrySqs
+          AWS_LAMBDA_LOG_LEVEL: trace
+      Policies:
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt QrEncodeEntrySqs.QueueName
       Events:
         Encode:
           Type: Api 
@@ -42,6 +55,21 @@ Resources:
             RestApiId: !Ref QrApi
             Path: /encode
             Method: post
+
+  ApplicationResourceGroup:
+    Type: AWS::ResourceGroups::Group
+    Properties:
+      Name:
+        Fn::Sub: ApplicationInsights-SAM-${AWS::StackName}
+      ResourceQuery:
+        Type: CLOUDFORMATION_STACK_1_0
+
+  ApplicationInsightsMonitoring:
+    Type: AWS::ApplicationInsights::Application
+    Properties:
+      ResourceGroupName:
+        Ref: ApplicationResourceGroup
+      AutoConfigurationEnabled: 'true'
 
 Outputs:
   QrEncodeApiUrl:
