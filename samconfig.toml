@@ -26,7 +26,6 @@ parameter_overrides = "Environment=dev"
 resolve_s3 = true
 
 [default.sync.parameters]
-watch = true
 beta_features = true
 
 [default.local_start_api.parameters]
@@ -61,7 +60,6 @@ parameter_overrides = "Environment=stage"
 resolve_s3 = true
 
 [stage.sync.parameters]
-watch = true
 beta_features = true
 
 [stage.local_start_api.parameters]
@@ -96,7 +94,6 @@ parameter_overrides = "Environment=prod"
 resolve_s3 = true
 
 [prod.sync.parameters]
-watch = true
 beta_features = true
 
 [prod.local_start_api.parameters]

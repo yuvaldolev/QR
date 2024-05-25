@@ -1,7 +1,7 @@
 use bitvec::{order::Msb0, vec::BitVec};
 
 use crate::{
-    data_analyzer::DataAnalyzer, error, segment::Segment, segment_encoder::SegmentEncoder,
+    data_analyzer::DataAnalyzer, segment::Segment, segment_encoder::SegmentEncoder,
     version::Version, version_analyzer::VersionAnalyzer, ErrorCorrectionLevel,
 };
 
@@ -22,7 +22,7 @@ impl Encoder {
         }
     }
 
-    pub fn encode(&self, data: &str) -> error::Result<()> {
+    pub fn encode(&self, data: &str) -> qr_error::Result<()> {
         let segments = self.data_analyzer.analyze(data);
         let version = self
             .version_analyzer

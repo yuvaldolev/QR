@@ -1,4 +1,4 @@
-use crate::{error, segment::Segment, version::Version, ErrorCorrectionLevel};
+use crate::{segment::Segment, version::Version, ErrorCorrectionLevel};
 
 pub struct VersionAnalyzer;
 
@@ -11,7 +11,7 @@ impl VersionAnalyzer {
         &self,
         segments: &[Segment],
         error_correction_level: ErrorCorrectionLevel,
-    ) -> error::Result<Version> {
+    ) -> qr_error::Result<Version> {
         let mut low_version = Version::new(1);
 
         for version in &[Version::new(9), Version::new(26), Version::new(40)] {
@@ -30,7 +30,7 @@ impl VersionAnalyzer {
             ));
         }
 
-        Err(error::Error::DataTooLong)
+        Err(qr_error::Error::DataTooLong)
     }
 
     fn calculate_total_encoded_length(segments: &[Segment], version: &Version) -> usize {

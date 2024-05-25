@@ -4,4 +4,5 @@ members = [
   "crates/qr_cli",
   "crates/qr_encode_entry_function",
   "crates/qr_encoder",
+  "crates/qr_error",
 ]

@@ -1,7 +1,5 @@
 use std::collections::HashMap;
 
-use crate::error;
-
 pub struct AlphanumericEncodingTable {
     table: HashMap<char, u8>,
 }
@@ -63,10 +61,10 @@ impl AlphanumericEncodingTable {
         self.table.contains_key(&key)
     }
 
-    pub fn get(&self, key: char) -> error::Result<u8> {
+    pub fn get(&self, key: char) -> qr_error::Result<u8> {
         self.table
             .get(&key)
-            .ok_or(error::Error::InvalidAlphanumericEncodingTableKey(key))
+            .ok_or(qr_error::Error::InvalidAlphanumericEncodingTableKey(key))
             .copied()
     }
 }
