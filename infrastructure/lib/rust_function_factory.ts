@@ -1,5 +1,6 @@
 import {Stack} from "aws-cdk-lib";
 import {Architecture, IFunction} from "aws-cdk-lib/aws-lambda";
+import {LogGroup} from "aws-cdk-lib/aws-logs";
 import {RustFunction} from "cargo-lambda-cdk";
 import * as path from "path";
 
@@ -14,13 +15,21 @@ export class RustFunctionFactory {
   make(name: string, binary: string,
        environment: {[key: string]: string}): IFunction {
     const functionName = `${this.stack.stackName}-${name}`;
+
+    const logGroupName = `/aws/lambda/${functionName}`;
+    const logGroup = new LogGroup(this.stack, logGroupName, {
+      logGroupName : logGroupName,
+    });
+
     return new RustFunction(this.stack, functionName, {
       functionName : functionName,
       manifestPath : MANIFEST_FILE,
       binaryName : binary,
+      architecture : Architecture.ARM_64,
+      logGroup : logGroup,
+      environment : environment,
       bundling : {
         architecture : Architecture.ARM_64,
-        environment : environment,
       },
     });
   }

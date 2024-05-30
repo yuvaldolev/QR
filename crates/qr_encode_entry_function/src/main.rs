@@ -15,9 +15,9 @@ async fn try_handle(event: LambdaEvent<ApiGatewayProxyRequest>) -> anyhow::Resul
 
     let request: QrEncodeRequest = serde_json::from_str(&proxy_request_body)?;
     let aws_configuration = aws_config::load_from_env().await;
-    let sqs_url = env::var("SQS_URL")?;
+    let queue_url = env::var("QUEUE_URL")?;
 
-    let function = QrEncodeEntryFunction::new(request, aws_configuration, sqs_url);
+    let function = QrEncodeEntryFunction::new(request, aws_configuration, queue_url);
     let response = function.run().await?;
 
     let response_json = serde_json::to_string(&response)?;

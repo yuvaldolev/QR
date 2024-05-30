@@ -1,4 +1,5 @@
-import {CfnOutput, Stack, StackProps} from "aws-cdk-lib";
+import {CfnOutput, Duration, Stack, StackProps} from "aws-cdk-lib";
+import {Queue} from "aws-cdk-lib/aws-sqs";
 import {Construct} from "constructs";
 
 import {Environment} from "./environment";
@@ -15,16 +16,19 @@ export class QrBackendStack extends Stack {
               props?: StackProps) {
     super(scope, id, props);
 
-    // example resource
-    // const queue = new sqs.Queue(this, 'InfrastructureQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
+    const encodeEntryQueue =
+        new Queue(this, "QrEncodeEntryQueue",
+                  {visibilityTimeout : Duration.seconds(300)});
 
     const rustFunctionFactory = new RustFunctionFactory(this);
 
     const encodeEntryFunction = rustFunctionFactory.make(
         "QrEncodeEntryFunction", "qr_encode_entry_function",
-        new FunctionEnvironmentBuilder(environment).build());
+        new FunctionEnvironmentBuilder(environment)
+            .set("QUEUE_URL", encodeEntryQueue.queueUrl)
+            .build());
+
+    encodeEntryQueue.grantSendMessages(encodeEntryFunction);
 
     const encodeEntryRestApi =
         new LambdaRestApiBuilder(this, "QrEncodeEntryRestApi",
