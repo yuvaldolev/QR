@@ -1,4 +1,12 @@
 /target/
-.aws-sam/
-
 crates/**/Cargo.lock
+
+*.js
+!jest.config.js
+*.d.ts
+node_modules
+
+.cdk.staging
+cdk.out
+
+dist/
