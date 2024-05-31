@@ -72,7 +72,7 @@ jobs:
 
       - name: Retrieve QR Encode API URL
         run: |
-          ENCODE_API_URL=$(aws cloudformation describe-stacks ${{ env.STACK_NAME }} | jq '.Stacks[0].Outputs | .[] | select(.OutputKey == "${{ env.ENCODE_API_URL_OUTPUT_KEY }}") | .OutputValue')
+          ENCODE_API_URL=$(aws cloudformation describe-stacks --stack-name ${{ env.STACK_NAME }} | jq '.Stacks[0].Outputs | .[] | select(.OutputKey == "${{ env.ENCODE_API_URL_OUTPUT_KEY }}") | .OutputValue')
           echo "ENCODE_API_URL=$ENCODE_API_URL" >> $GITHUB_ENV
 
       - name: Print QR Encode API URL
