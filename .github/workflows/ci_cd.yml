@@ -60,7 +60,7 @@ jobs:
 
       - name: Determine Stack Name
         run: |
-          if [[ "schedule" == github.event_name || "workflow_dispatch" == github.event_name ]]; then
+          if [[ "schedule" == ${{ github.event_name }} || "workflow_dispatch" == ${{ github.event_name }} ]]; then
             STACK_NAME="${{ env.STACK_BASE_NAME }}-prod"
           else
             STACK_NAME="${{ env.STACK_BASE_NAME }}-stage"
@@ -105,9 +105,9 @@ jobs:
 
       - name: Determine OS Name
         run: |
-          if [[ ${{ matrix.os }} == 'ubuntu-latest' ]]; then
+          if [[ "ubuntu-latest" == ${{ matrix.os }} ]]; then
             OS_NAME=linux
-          elif [[ ${{ matrix.os }} == 'macos-latest' ]]; then
+          elif [[ "macos-latest" == ${{ matrix.os }} ]]; then
             OS_NAME=macos
           fi
           echo "OS_NAME=$OS_NAME" >> $GITHUB_ENV
@@ -169,5 +169,3 @@ jobs:
           files: |
             qr_cli/qr_cli_linux
             qr_cli/qr_cli_macos
-
-
