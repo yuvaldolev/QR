@@ -10,6 +10,8 @@ on:
 
 env:
   AWS_REGION: eu-central-1
+  STACK_BASE_NAME: "QrBackendStack"
+  ENCODE_API_URL_OUTPUT_KEY: "encodeApiUrl"
 
 permissions:
   id-token: write
@@ -23,11 +25,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Setup Python
-        uses: actions/setup-python@v2
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: latest
 
-      - name: Setup AWS SAM
-        uses: aws-actions/setup-sam@v1
+      - name: Install AWS CLI
+        uses: unfor19/install-aws-cli-action@v1
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -51,45 +55,37 @@ jobs:
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Build Backend - Stage
-        if: github.event_name == 'push'
-        run: sam build --config-env stage
+      - name: Install Infrastructure Dependencies
+        run: npm ci
 
-      - name: Build Backend - Prod
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-        run: sam build --config-env prod
-
-      - name: Deploy Backend - Stage
-        if: github.event_name == 'push'
-        run: sam deploy --config-env stage --no-confirm-changeset --no-fail-on-empty-changeset
-
-      - name: Deploy Backend - Prod
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-        run: sam deploy --config-env prod --no-confirm-changeset --no-fail-on-empty-changeset
-
-      - name: Retrieve QR Encode API URL - Stage
-        if: github.event_name == 'push'
+      - name: Determine Stack Name
         run: |
-          QR_ENCODE_API_URL=$(sam list stack-outputs --config-env stage --output json | jq '.[] | select(.OutputKey == "QrEncodeApiUrl") | .OutputValue')
-          echo "QR_ENCODE_API_URL=$QR_ENCODE_API_URL" >> $GITHUB_ENV
+          if [[ "schedule" == github.event_name || "workflow_dispatch" == github.event_name ]]; then
+            STACK_NAME="${{ env.STACK_BASE_NAME }}-prod"
+          else
+            STACK_NAME="${{ env.STACK_BASE_NAME }}-stage"
+          fi
+          echo "STACK_NAME=$STACK_NAME" >> $GITHUB_ENV
 
-      - name: Retrieve QR Encode API URL - Prod
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+      - name: Deploy Backend
+        run: npm run deploy ${{ env.STACK_NAME }} -- --require-approval never
+
+      - name: Retrieve QR Encode API URL
         run: |
-          QR_ENCODE_API_URL=$(sam list stack-outputs --config-env prod --output json | jq '.[] | select(.OutputKey == "QrEncodeApiUrl") | .OutputValue')
-          echo "QR_ENCODE_API_URL=$QR_ENCODE_API_URL" >> $GITHUB_ENV
+          ENCODE_API_URL=$(aws cloudformation describe-stacks ${{ env.STACK_NAME }} | jq '.Stacks[0].Outputs | .[] | select(.OutputKey == "${{ env.ENCODE_API_URL_OUTPUT_KEY }}") | .OutputValue')
+          echo "ENCODE_API_URL=$ENCODE_API_URL" >> $GITHUB_ENV
 
       - name: Print QR Encode API URL
-        run: echo "QR encode API URL - ${{ env.QR_ENCODE_API_URL }}"
+        run: echo "QR encode API URL - ${{ env.ENCODE_API_URL }}"
       
       - name: Save QR Encode API URL
-        run: echo "${{ env.QR_ENCODE_API_URL }}" > qr_encode_api_url.txt
+        run: echo "${{ env.ENCODE_API_URL }}" > encode_api_url.txt
 
       - name: Upload QR Encode API URL
         uses: actions/upload-artifact@v4
         with:
           name: qr_encode_api_url
-          path: qr_encode_api_url.txt
+          path: encode_api_url.txt
 
   build-upload-frontend:
     needs: build-deploy-backend
@@ -121,14 +117,14 @@ jobs:
         with:
           name: qr_encode_api_url
 
-      - name: Read QR Encode API URL into environment
+      - name: Read Encode API URL into environment
         run: |
-          QR_ENCODE_API_URL=$(cat qr_encode_api_url.txt)
-          echo "QR_ENCODE_API_URL=$QR_ENCODE_API_URL" >> $GITHUB_ENV
+          ENCODE_API_URL=$(cat encode_api_url.txt)
+          echo "ENCODE_API_URL=$ENCODE_API_URL" >> $GITHUB_ENV
 
       - name: Build CLI Frontend
         env:
-          QR_ENCODE_API_URL: ${{ env.QR_ENCODE_API_URL }}
+          ENCODE_API_URL: ${{ env.ENCODE_API_URL }}
         run: cargo build -p qr_cli --release
 
       - name: Prepare CLI Frontend for Upload

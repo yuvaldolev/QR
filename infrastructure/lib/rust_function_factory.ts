@@ -25,7 +25,6 @@ export class RustFunctionFactory {
       functionName : functionName,
       manifestPath : MANIFEST_FILE,
       binaryName : binary,
-      architecture : Architecture.ARM_64,
       logGroup : logGroup,
       environment : environment,
       bundling : {
