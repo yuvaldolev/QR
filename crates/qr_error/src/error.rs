@@ -10,10 +10,19 @@ pub enum Error {
     #[error("data too long to be encoded in a single QR code")]
     DataTooLong,
 
-    #[error("failed serializing request '{0}' to JSON")]
-    SerializeRequest(#[source] serde_json::Error, String),
+    #[error("request body is missing")]
+    MissingRequestBody,
 
-    #[error("failed sending message '{0}' to SQS '{1}'")]
+    #[error("failed deserializing request '{1}' to JSON")]
+    DeserializeRequest(#[source] serde_json::Error, String),
+
+    #[error("failed serializing response to JSON")]
+    SerializeResponse(#[source] serde_json::Error),
+
+    #[error("failed serializing SQS message to JSON")]
+    SerializeQueueMessage(#[source] serde_json::Error),
+
+    #[error("failed sending message '{1}' to SQS '{2}'")]
     SendSqsMessage(#[source] SdkError<SendMessageError>, String, String),
 }
 

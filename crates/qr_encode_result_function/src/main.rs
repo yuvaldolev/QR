@@ -1,12 +1,8 @@
 use std::env;
 
-use aws_lambda_events::{
-    apigw::{ApiGatewayProxyRequest, ApiGatewayProxyResponse},
-    encodings::Body,
-    http::HeaderMap,
-};
+use aws_lambda_events::sqs::SqsEventObj;
 use lambda_runtime::{tracing, Error, LambdaEvent};
-use qr_encode_entry_function::{QrEncodeEntryFunction, QrEncodeRequest};
+use qr_encode_result_function::QrEncodeResultRequest;
 
 async fn try_handle(event: LambdaEvent<ApiGatewayProxyRequest>) -> Result<String, Error> {
     let (proxy_request, _) = event.into_parts();
@@ -26,8 +22,8 @@ async fn try_handle(event: LambdaEvent<ApiGatewayProxyRequest>) -> Result<String
 }
 
 async fn function_handler(
-    event: LambdaEvent<ApiGatewayProxyRequest>,
-) -> Result<ApiGatewayProxyResponse, Error> {
+    event: LambdaEvent<SqsEventObj<QrEncodeResultRequest>>,
+) -> Result<(), Error> {
     let (status_code, body) = match try_handle(event).await {
         Ok(response) => (200, response),
         Err(e) => {

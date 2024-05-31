@@ -1,18 +1,17 @@
 use std::fmt::{self, Display, Formatter};
 
+use qr_encoder::ErrorCorrectionLevel;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::ErrorCorrectionLevel;
-
 #[derive(Deserialize, Serialize)]
-pub struct Request {
+pub struct QrEncodeResultRequest {
     id: u128,
     data: String,
     error_correction_level: ErrorCorrectionLevel,
 }
 
-impl Request {
+impl QrEncodeResultRequest {
     pub fn new(data: String, error_correction_level: ErrorCorrectionLevel) -> Self {
         Self {
             id: Uuid::new_v4().as_u128(),
@@ -26,11 +25,11 @@ impl Request {
     }
 }
 
-impl Display for Request {
+impl Display for QrEncodeResultRequest {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         write!(
             f,
-            "Request {{ id: {}, data: {}, error_correction_level: {} }}",
+            "QrEncodeResultRequest {{ id: {}, data: {}, error_correction_level: {} }}",
             self.id, self.data, self.error_correction_level
         )
     }

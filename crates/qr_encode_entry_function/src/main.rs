@@ -1,52 +1,25 @@
 use std::env;
 
-use aws_lambda_events::{
-    apigw::{ApiGatewayProxyRequest, ApiGatewayProxyResponse},
-    encodings::Body,
-    http::HeaderMap,
-};
+use aws_lambda_events::apigw::{ApiGatewayProxyRequest, ApiGatewayProxyResponse};
 use lambda_runtime::{tracing, Error, LambdaEvent};
-use qr_encode_entry_function::{QrEncodeEntryFunction, QrEncodeRequest};
-
-async fn try_handle(event: LambdaEvent<ApiGatewayProxyRequest>) -> anyhow::Result<String> {
-    let (proxy_request, _) = event.into_parts();
-
-    let proxy_request_body = proxy_request.body.unwrap();
-
-    let aws_configuration = aws_config::load_from_env().await;
-    let queue_url = env::var("QUEUE_URL")?;
-
-    let function = QrEncodeEntryFunction::new(aws_configuration, queue_url);
-
-    let request: QrEncodeRequest = serde_json::from_str(&proxy_request_body)?;
-    let response = function.run(request).await?;
-
-    let response_json = serde_json::to_string(&response)?;
-
-    Ok(response_json)
-}
+use qr_aws::ApiGatewayToSqsFunction;
+use qr_encode_entry_function::EncodeEntryEventProcessor;
 
 async fn function_handler(
     event: LambdaEvent<ApiGatewayProxyRequest>,
 ) -> Result<ApiGatewayProxyResponse, Error> {
-    let (status_code, body) = match try_handle(event).await {
-        Ok(response) => (200, response),
-        Err(e) => {
-            tracing::error!("Failed to handle request: {:#}", e);
-            (500, String::from("Internal Server Error"))
-        }
-    };
+    let aws_configuration = aws_config::load_from_env().await;
 
-    let mut headers = HeaderMap::new();
-    headers.insert("content-type", "application/json".parse().unwrap());
+    let queue_url = env::var("QUEUE_URL").expect("environment variable QUEUE_URL should be set");
 
-    Ok(ApiGatewayProxyResponse {
-        status_code,
-        multi_value_headers: headers.clone(),
-        is_base64_encoded: false,
-        body: Some(Body::Text(body)),
-        headers,
-    })
+    let function = ApiGatewayToSqsFunction::new(
+        aws_configuration,
+        queue_url,
+        EncodeEntryEventProcessor::new(),
+    );
+    let response = function.run(event).await;
+
+    Ok(response)
 }
 
 #[tokio::main]

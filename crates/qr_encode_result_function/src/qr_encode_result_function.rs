@@ -4,7 +4,7 @@ use qr_encoder::Request;
 
 use crate::{QrEncodeRequest, QrEncodeResponse};
 
-pub struct QrEncodeEntryFunction {
+pub struct QrEncodeResultFunction {
     request: QrEncodeRequest,
     sqs_url: String,
     sqs_client: aws_sdk_sqs::Client,
