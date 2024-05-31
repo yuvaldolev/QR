@@ -2,7 +2,7 @@ use reqwest::blocking::Client;
 
 mod cli;
 
-const QR_ENCODE_API_URL: &str = env!("QR_ENCODE_API_URL");
+const ENCODE_API_URL: &str = env!("ENCODE_API_URL");
 
 fn main() -> anyhow::Result<()> {
     // let cli = Cli::parse();
@@ -12,8 +12,8 @@ fn main() -> anyhow::Result<()> {
 
     let client = Client::new();
 
-    println!("Sending request to {}", QR_ENCODE_API_URL);
-    let response = client.post(QR_ENCODE_API_URL).send()?;
+    println!("Sending request to {}", ENCODE_API_URL);
+    let response = client.post(ENCODE_API_URL).send()?;
     println!("Response: {:?}", response);
 
     Ok(())

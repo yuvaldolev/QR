@@ -10,11 +10,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Setup Python
-        uses: actions/setup-python@v2
-
-      - name: Setup AWS SAM
-        uses: aws-actions/setup-sam@v1
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: latest
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -31,11 +30,11 @@ jobs:
           platform: linux
           arch: x86_64
 
-      - name: Build Backend
-        run: sam build
+      - name: Install Infrastructure Dependencies
+        run: npm ci
 
-      - name: Validate Backend SAM Template
-        run: sam validate
+      - name: Synthesize Backend
+        run: npm run synth 
 
   build-frontend:
     strategy:
@@ -53,5 +52,5 @@ jobs:
 
       - name: Build CLI Frontend
         env:
-          QR_ENCODE_API_URL: ""
+          ENCODE_API_URL: ""
         run: cargo build -p qr_cli --release
