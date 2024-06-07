@@ -28,13 +28,13 @@ export class QrBackendStack extends Stack {
             .set("QUEUE_URL", encodeEntryQueue.queueUrl)
             .build());
 
-    encodeEntryQueue.grantSendMessages(encodeEntryFunction);
-
     const encodeEntryRestApi =
         new LambdaRestApiBuilder(this, "QrEncodeEntryRestApi",
                                  encodeEntryFunction, environment)
             .resource(ENCODE_RESOURCE, "POST")
             .build();
+
+    encodeEntryQueue.grantSendMessages(encodeEntryFunction);
 
     new CfnOutput(this, "encodeApiUrl",
                   {value : `${encodeEntryRestApi.url}${ENCODE_RESOURCE}`});

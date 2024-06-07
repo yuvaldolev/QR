@@ -33,7 +33,7 @@ where
     pub async fn run(&self, event: LambdaEvent<ApiGatewayProxyRequest>) -> ApiGatewayProxyResponse {
         tracing::info!("Processing API gateway event");
 
-        let (status_code, body) = match self.handle_event(event).await {
+        let (status_code, response_body) = match self.handle_event(event).await {
             Ok(response) => (200, response),
             Err(e) => {
                 tracing::error!(
@@ -51,7 +51,7 @@ where
             status_code,
             multi_value_headers: headers.clone(),
             is_base64_encoded: false,
-            body: Some(Body::Text(body)),
+            body: Some(Body::Text(response_body)),
             headers,
         }
     }
