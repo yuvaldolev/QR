@@ -8,6 +8,7 @@ import {
   LambdaRestApiBuilder,
 } from "./lambda_rest_api_builder";
 import {RustFunctionFactory} from "./rust_function_factory";
+import { WebSocketApi } from "aws-cdk-lib/aws-apigatewayv2";
 
 const ENCODE_RESOURCE = "encode";
 
@@ -35,6 +36,12 @@ export class QrBackendStack extends Stack {
             .build();
 
     encodeEntryQueue.grantSendMessages(encodeEntryFunction);
+
+    const resultWebSocket = new WebSocketApi(this, "ResultWebSocket", {
+        apiName: "ResultWebSocket",
+    });
+
+    new WebSocketStage(this, "ResultWebSocketStage");
 
     new CfnOutput(this, "encodeApiUrl",
                   {value : `${encodeEntryRestApi.url}${ENCODE_RESOURCE}`});

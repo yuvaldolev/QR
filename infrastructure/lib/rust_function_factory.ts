@@ -18,7 +18,7 @@ export class RustFunctionFactory {
 
     const logGroupName = `/aws/lambda/${functionName}`;
     const logGroup = new LogGroup(this.stack, logGroupName, {
-      logGroupName : logGroupName,
+      logGroupName,
     });
 
     return new RustFunction(this.stack, functionName, {
