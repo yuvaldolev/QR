@@ -1,12 +1,12 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct QrEncodeResponse {
-    request_id: u128,
+    request_id: String,
 }
 
 impl QrEncodeResponse {
-    pub fn new(request_id: u128) -> Self {
+    pub fn new(request_id: String) -> Self {
         QrEncodeResponse { request_id }
     }
 }

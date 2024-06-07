@@ -60,7 +60,7 @@ where
         &self,
         event: LambdaEvent<ApiGatewayProxyRequest>,
     ) -> qr_error::Result<String> {
-        let (proxy_request, _) = event.into_parts();
+        let (proxy_request, context) = event.into_parts();
 
         let proxy_request_body = proxy_request
             .body
@@ -70,7 +70,10 @@ where
         let request: <EventProcessor as ProcessEvent>::Request =
             serde_json::from_str(&proxy_request_body)
                 .map_err(|e| qr_error::Error::DeserializeRequest(e, proxy_request_body.clone()))?;
-        let (queue_message, response) = self.event_processor.process_event(request).await?;
+        let (queue_message, response) = self
+            .event_processor
+            .process_event(&request, &context)
+            .await?;
 
         let queue_message_json = serde_json::to_string(&queue_message)
             .map_err(qr_error::Error::SerializeQueueMessage)?;

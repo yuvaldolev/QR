@@ -1,3 +1,4 @@
+use lambda_runtime::Context;
 use qr_aws::ProcessEvent;
 use qr_encode_result_function::QrEncodeResultRequest;
 
@@ -19,14 +20,16 @@ impl ProcessEvent for EncodeEntryEventProcessor {
 
     async fn process_event(
         &self,
-        request: Self::Request,
+        request: &Self::Request,
+        context: &Context,
     ) -> qr_error::Result<(Self::QueueMessage, Self::Response)> {
         let queue_message = QrEncodeResultRequest::new(
+            context.request_id.clone(),
             request.get_data().to_owned(),
             request.get_error_correction_level(),
         );
 
-        let response = QrEncodeResponse::new(queue_message.get_id());
+        let response = QrEncodeResponse::new(context.request_id.clone());
 
         Ok((queue_message, response))
     }

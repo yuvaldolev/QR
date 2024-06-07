@@ -1,3 +1,4 @@
+use lambda_runtime::Context;
 use serde::{de::DeserializeOwned, Serialize};
 
 #[async_trait::async_trait]
@@ -8,6 +9,7 @@ pub trait ProcessEvent {
 
     async fn process_event(
         &self,
-        request: Self::Request,
+        request: &Self::Request,
+        context: &Context,
     ) -> qr_error::Result<(Self::QueueMessage, Self::Response)>;
 }
