@@ -46,26 +46,24 @@ export class QrBackendStack extends Stack {
     encodeEntryQueue.grantSendMessages(encodeEntryFunction);
 
     const resultWebSocketConnectFunction = rustFunctionFactory.make(
-      "ResultWebSocketConnectFunction",
-      "result_websocket_connect_function",
+      "QrResultWebSocketConnectFunction",
+      "qr_result_web_socket_connect_function",
       new FunctionEnvironmentBuilder(environment).build(),
     );
 
     const resultWebSocketApi = new WebSocketApiBuilder(
       this,
-      "ResultWebSocketApi",
+      "QrResultWebSocketApi",
       environment,
       resultWebSocketConnectFunction,
-    );
-
-    const resultWebSocket = new WebSocketApi(this, "ResultWebSocket", {
-      apiName: "ResultWebSocket",
-    });
-
-    new WebSocketStage(this, "ResultWebSocketStage");
+    ).build();
 
     new CfnOutput(this, "encodeApiUrl", {
       value: `${encodeEntryRestApi.url}${ENCODE_RESOURCE}`,
+    });
+
+    new CfnOutput(this, "resultWebSocketApiUrl", {
+      value: `${resultWebSocketApi.apiEndpoint}/${environment}`,
     });
   }
 }

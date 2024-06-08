@@ -1673,7 +1673,6 @@ dependencies = [
 name = "qr_encode_entry_function"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "async-trait",
  "aws-config",
  "aws_lambda_events",
@@ -1719,6 +1718,17 @@ dependencies = [
  "aws-sdk-sqs",
  "serde_json",
  "thiserror",
+]
+
+[[package]]
+name = "qr_result_web_socket_connect_function"
+version = "0.1.0"
+dependencies = [
+ "aws_lambda_events",
+ "lambda_runtime",
+ "serde",
+ "serde_json",
+ "tokio",
 ]
 
 [[package]]

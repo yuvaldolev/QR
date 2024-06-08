@@ -7,4 +7,5 @@ members = [
   "crates/qr_encode_result_function",
   "crates/qr_encoder",
   "crates/qr_error",
+  "crates/qr_result_web_socket_connect_function",
 ]
