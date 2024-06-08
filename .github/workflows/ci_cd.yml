@@ -77,7 +77,7 @@ jobs:
 
       - name: Print QR Encode API URL
         run: echo "QR encode API URL - ${{ env.ENCODE_API_URL }}"
-      
+
       - name: Save QR Encode API URL
         run: echo "${{ env.ENCODE_API_URL }}" > encode_api_url.txt
 

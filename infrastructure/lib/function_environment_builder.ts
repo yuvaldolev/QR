@@ -1,13 +1,15 @@
-import {Environment} from "./environment";
+import { Environment } from "./environment";
 
 export class FunctionEnvironmentBuilder {
-  private readonly functionEnvironment: {[key: string]: string} = {};
+  private readonly functionEnvironment: { [key: string]: string } = {};
 
   constructor(environment: Environment) {
     this.setupInitialEnvironment(environment);
   }
 
-  build(): {[key: string]: string} { return this.functionEnvironment; }
+  build(): { [key: string]: string } {
+    return this.functionEnvironment;
+  }
 
   set(key: string, value: string): FunctionEnvironmentBuilder {
     this.functionEnvironment[key] = value;

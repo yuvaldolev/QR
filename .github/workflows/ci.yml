@@ -34,7 +34,7 @@ jobs:
         run: npm ci
 
       - name: Synthesize Backend
-        run: npm run synth 
+        run: npm run synth
 
   build-frontend:
     strategy:
