@@ -1,3 +1,7 @@
+mod handle_event;
+
+pub use handle_event::HandleEvent;
+
 use aws_config::SdkConfig;
 use aws_lambda_events::{
     apigw::{ApiGatewayProxyRequest, ApiGatewayProxyResponse},
@@ -6,32 +10,30 @@ use aws_lambda_events::{
 };
 use lambda_runtime::{tracing, LambdaEvent};
 
-use crate::process_event::ProcessEvent;
-
-pub struct ApiGatewayToSqsFunction<EventProcessor> {
+pub struct Function<EventHandler> {
     queue_url: String,
-    event_processor: EventProcessor,
+    event_handler: EventHandler,
     sqs_client: aws_sdk_sqs::Client,
 }
 
-impl<EventProcessor> ApiGatewayToSqsFunction<EventProcessor>
+impl<EventHandler> Function<EventHandler>
 where
-    EventProcessor: ProcessEvent,
+    EventHandler: HandleEvent,
 {
     pub fn new(
         aws_configuration: SdkConfig,
         queue_url: String,
-        event_processor: EventProcessor,
+        event_handler: EventHandler,
     ) -> Self {
         Self {
             queue_url,
-            event_processor,
+            event_handler,
             sqs_client: aws_sdk_sqs::Client::new(&aws_configuration),
         }
     }
 
     pub async fn run(&self, event: LambdaEvent<ApiGatewayProxyRequest>) -> ApiGatewayProxyResponse {
-        tracing::info!("Processing API gateway event");
+        tracing::info!("Handling API gateway event");
 
         let (status_code, response_body) = match self.handle_event(event).await {
             Ok(response) => (200, response),
@@ -67,17 +69,14 @@ where
             .ok_or(qr_error::Error::MissingRequestBody)?;
 
         tracing::trace!("Deserializing request '{proxy_request_body}' from JSON");
-        let request: <EventProcessor as ProcessEvent>::Request =
+        let request: <EventHandler as HandleEvent>::Request =
             serde_json::from_str(&proxy_request_body)
                 .map_err(|e| qr_error::Error::DeserializeRequest(e, proxy_request_body.clone()))?;
-        let (queue_message, response) = self
-            .event_processor
-            .process_event(&request, &context)
-            .await?;
+        let (queue_message, response) = self.event_handler.handle_event(&context, &request).await?;
 
         let queue_message_json = serde_json::to_string(&queue_message)
             .map_err(qr_error::Error::SerializeQueueMessage)?;
-        tracing::trace!("Serialized SQS message to JSON: {}", queue_message_json);
+        tracing::trace!("Serialized SQS message to JSON: '{}'", queue_message_json);
 
         tracing::info!(
             "Writing message '{}' to SQS '{}",
@@ -96,7 +95,7 @@ where
 
         let response_json =
             serde_json::to_string(&response).map_err(qr_error::Error::SerializeResponse)?;
-        tracing::trace!("Serializing resonse to JSON: {}", response_json);
+        tracing::trace!("Serialized resonse to JSON: '{}'", response_json);
 
         Ok(response_json)
     }

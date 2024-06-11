@@ -51,11 +51,18 @@ export class QrBackendStack extends Stack {
       new FunctionEnvironmentBuilder(environment).build(),
     );
 
+    const resultWebSocketDisconnectFunction = rustFunctionFactory.make(
+      "QrResultWebSocketDisconnectFunction",
+      "qr_result_web_socket_disconnect_function",
+      new FunctionEnvironmentBuilder(environment).build(),
+    );
+
     const resultWebSocketApi = new WebSocketApiBuilder(
       this,
       "QrResultWebSocketApi",
       environment,
       resultWebSocketConnectFunction,
+      resultWebSocketDisconnectFunction,
     ).build();
 
     new CfnOutput(this, "encodeApiUrl", {

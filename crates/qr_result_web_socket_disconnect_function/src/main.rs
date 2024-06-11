@@ -1,7 +1,7 @@
 use aws_lambda_events::apigw::{ApiGatewayProxyResponse, ApiGatewayWebsocketProxyRequest};
 use lambda_runtime::{tracing, Error, LambdaEvent};
 use qr_aws::functions::web_socket_handler::Function;
-use qr_result_web_socket_connect_function::EventHandler;
+use qr_result_web_socket_disconnect_function::EventHandler;
 
 async fn function_handler(
     event: LambdaEvent<ApiGatewayWebsocketProxyRequest>,

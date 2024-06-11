@@ -2,8 +2,8 @@ use std::env;
 
 use aws_lambda_events::apigw::{ApiGatewayProxyRequest, ApiGatewayProxyResponse};
 use lambda_runtime::{tracing, Error, LambdaEvent};
-use qr_aws::ApiGatewayToSqsFunction;
-use qr_encode_entry_function::EncodeEntryEventProcessor;
+use qr_aws::functions::api_gateway_to_sqs::Function;
+use qr_encode_entry_function::EventHandler;
 
 async fn function_handler(
     event: LambdaEvent<ApiGatewayProxyRequest>,
@@ -12,11 +12,7 @@ async fn function_handler(
 
     let queue_url = env::var("QUEUE_URL").expect("environment variable QUEUE_URL should be set");
 
-    let function = ApiGatewayToSqsFunction::new(
-        aws_configuration,
-        queue_url,
-        EncodeEntryEventProcessor::new(),
-    );
+    let function = Function::new(aws_configuration, queue_url, EventHandler::new());
     let response = function.run(event).await;
 
     Ok(response)

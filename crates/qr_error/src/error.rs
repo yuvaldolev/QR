@@ -24,6 +24,12 @@ pub enum Error {
 
     #[error("failed sending message '{1}' to SQS '{2}'")]
     SendSqsMessage(#[source] SdkError<SendMessageError>, String, String),
+
+    #[error("no connection ID found in WebSocket request")]
+    NoWebSocketConnectionId,
+
+    #[error("unexpected request")]
+    UnexpectedRequest,
 }
 
 pub type Result<T> = result::Result<T, Error>;
