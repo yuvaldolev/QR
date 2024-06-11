@@ -45,25 +45,10 @@ export class QrBackendStack extends Stack {
 
     encodeEntryQueue.grantSendMessages(encodeEntryFunction);
 
-    const resultWebSocketConnectFunction = rustFunctionFactory.make(
-      "QrResultWebSocketConnectFunction",
-      "qr_result_web_socket_connect_function",
-      new FunctionEnvironmentBuilder(environment).build(),
-    );
-
-    const resultWebSocketDisconnectFunction = rustFunctionFactory.make(
-      "QrResultWebSocketDisconnectFunction",
-      "qr_result_web_socket_disconnect_function",
-      new FunctionEnvironmentBuilder(environment).build(),
-    );
-
-    const resultWebSocketApi = new WebSocketApiBuilder(
-      this,
-      "QrResultWebSocketApi",
+    const resultWebSocketApi = this.makeResultWebSocket(
       environment,
-      resultWebSocketConnectFunction,
-      resultWebSocketDisconnectFunction,
-    ).build();
+      rustFunctionFactory,
+    );
 
     new CfnOutput(this, "encodeApiUrl", {
       value: `${encodeEntryRestApi.url}${ENCODE_RESOURCE}`,
@@ -72,5 +57,30 @@ export class QrBackendStack extends Stack {
     new CfnOutput(this, "resultWebSocketApiUrl", {
       value: `${resultWebSocketApi.apiEndpoint}/${environment}`,
     });
+  }
+
+  private makeResultWebSocket(
+    environment: Environment,
+    rustFunctionFactory: RustFunctionFactory,
+  ): WebSocketApi {
+    const connectFunction = rustFunctionFactory.make(
+      "QrResultWebSocketConnectFunction",
+      "qr_result_web_socket_connect_function",
+      new FunctionEnvironmentBuilder(environment).build(),
+    );
+
+    const disconnectFunction = rustFunctionFactory.make(
+      "QrResultWebSocketDisconnectFunction",
+      "qr_result_web_socket_disconnect_function",
+      new FunctionEnvironmentBuilder(environment).build(),
+    );
+
+    return new WebSocketApiBuilder(
+      this,
+      "QrResultWebSocketApi",
+      environment,
+      connectFunction,
+      disconnectFunction,
+    ).build();
   }
 }
