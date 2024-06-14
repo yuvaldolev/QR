@@ -34,7 +34,7 @@ where
             Ok(response) => (200, response),
             Err(e) => {
                 tracing::error!(
-                    "Failed to handle API gateway event: {:#}",
+                    "Failed to handle WebSocket event: {:#}",
                     anyhow::Error::from(e)
                 );
                 (500, String::from("Internal Server Error"))

@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+async-trait = "0.1.80"
 aws-config = { version = "1.5.0", features = ["behavior-version-latest"] }
 aws_lambda_events = "0.15.1"
 lambda_runtime = "0.11.2"
@@ -14,4 +15,3 @@ qr_error = { path = "../qr_error" }
 serde = { version = "1.0.202", features = ["derive"] }
 serde_json = "1.0.117"
 tokio = { version = "1", features = ["macros"] }
-async-trait = "0.1.80"
