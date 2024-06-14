@@ -115,6 +115,7 @@ where
         let SqsMessageObj {
             message_id, body, ..
         } = arguments.message;
+
         Ok(())
     }
 }
