@@ -21,7 +21,7 @@ where
     EventHandler: HandleEvent,
 {
     pub fn new(
-        aws_configuration: SdkConfig,
+        aws_configuration: &SdkConfig,
         queue_url: String,
         event_handler: EventHandler,
     ) -> Self {
@@ -92,6 +92,7 @@ where
             .map_err(|e| {
                 qr_error::Error::SendSqsMessage(e, queue_message_json, self.queue_url.clone())
             })?;
+        tracing::info!("Successfully wrote message to SQS");
 
         let response_json =
             serde_json::to_string(&response).map_err(qr_error::Error::SerializeResponse)?;

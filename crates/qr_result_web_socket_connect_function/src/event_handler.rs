@@ -17,12 +17,12 @@ impl HandleEvent for EventHandler {
     async fn handle_event(
         &self,
         _context: &Context,
-        _connection_id: &str,
+        connection_id: &str,
         request: Option<&Self::Request>,
     ) -> qr_error::Result<Self::Response> {
-        tracing::info!("Handling connect event");
-
         request.map_or(Ok(()), |_| Err(qr_error::Error::UnexpectedRequest))?;
+
+        tracing::info!("Handling connect event: connection_id='{connection_id}'");
 
         Ok(String::from("Connected!"))
     }

@@ -1,17 +1,18 @@
 use std::env;
 
-use aws_lambda_events::apigw::{ApiGatewayProxyRequest, ApiGatewayProxyResponse};
+use aws_lambda_events::apigw::{ApiGatewayProxyResponse, ApiGatewayWebsocketProxyRequest};
 use lambda_runtime::{tracing, Error, LambdaEvent};
-use qr_aws::functions::api_gateway_to_sqs::Function;
-use qr_encode_entry_function::EventHandler;
+use qr_aws::functions::web_socket_handler::Function;
+use qr_result_web_socket_monitor_function::EventHandler;
 
 async fn function_handler(
-    event: LambdaEvent<ApiGatewayProxyRequest>,
+    event: LambdaEvent<ApiGatewayWebsocketProxyRequest>,
 ) -> Result<ApiGatewayProxyResponse, Error> {
     let aws_configuration = aws_config::load_from_env().await;
-    let queue_url = env::var("QUEUE_URL").expect("environment variable `QUEUE_URL` should be set");
+    let table_name =
+        env::var("TABLE_NAME").expect("environment variable `TABLE_NAME` should be set");
 
-    let function = Function::new(&aws_configuration, queue_url, EventHandler::new());
+    let function = Function::new(EventHandler::new(&aws_configuration, table_name));
     let response = function.run(event).await;
 
     Ok(response)

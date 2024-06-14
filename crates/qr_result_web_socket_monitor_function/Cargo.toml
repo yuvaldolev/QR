@@ -1,5 +1,5 @@
 [package]
-name = "qr_result_web_socket_disconnect_function"
+name = "qr_result_web_socket_monitor_function"
 version = "0.1.0"
 edition = "2021"
 
