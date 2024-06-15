@@ -6,4 +6,9 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.83"
 clap = { version = "4.5.4", features = ["derive"] }
-reqwest = { version = "0.12.4", features = ["json", "blocking"] }
+futures-util = { version = "0.3.30", features = ["sink"] }
+qr_encoder = { path = "../qr_encoder" }
+qr_encode_entry_function = { path = "../qr_encode_entry_function" }
+reqwest = { version = "0.12.4", features = ["json"] }
+tokio = { version = "1.38.0", features = ["full"] }
+tokio-tungstenite = "0.22.0"
