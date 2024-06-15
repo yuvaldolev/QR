@@ -4,6 +4,7 @@ use aws_sdk_dynamodb::operation::{
     delete_item::DeleteItemError, put_item::PutItemError, query::QueryError,
 };
 use aws_sdk_sqs::operation::send_message::SendMessageError;
+use serde_json::Value;
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
@@ -16,11 +17,23 @@ pub enum Error {
     #[error("request body is missing")]
     MissingRequestBody,
 
-    #[error("failed deserializing request '{1}' to JSON")]
-    DeserializeRequest(#[source] serde_json::Error, String),
+    #[error("failed deserializing API Gateway request '{1}' from JSON")]
+    DeserializeApiGatewayRequest(#[source] serde_json::Error, String),
 
-    #[error("failed serializing response to JSON")]
-    SerializeResponse(#[source] serde_json::Error),
+    #[error("failed serializing API Gateway response to JSON")]
+    SerializeApiGatewayResponse(#[source] serde_json::Error),
+
+    #[error("failed deserializing WebSocket request '{1}' from JSON")]
+    DeserializeWebSocketRequest(#[source] serde_json::Error, String),
+
+    #[error("failed serializing WebSocket response to JSON")]
+    SerializeWebSocketResponse(#[source] serde_json::Error),
+
+    #[error("failed deserializing SQS input message '{1}' from JSON")]
+    DeserializeSqsInputMessage(#[source] serde_json::Error, Value),
+
+    #[error("failed serializing SQS output message to JSON")]
+    SerializeSqsOutputMessage(#[source] serde_json::Error),
 
     #[error("failed serializing SQS message to JSON")]
     SerializeQueueMessage(#[source] serde_json::Error),

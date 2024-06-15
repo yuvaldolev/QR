@@ -69,9 +69,12 @@ where
             .ok_or(qr_error::Error::MissingRequestBody)?;
 
         tracing::trace!("Deserializing request '{proxy_request_body}' from JSON");
-        let request: <EventHandler as HandleEvent>::Request =
-            serde_json::from_str(&proxy_request_body)
-                .map_err(|e| qr_error::Error::DeserializeRequest(e, proxy_request_body.clone()))?;
+        let request: EventHandler::Request =
+            serde_json::from_str(&proxy_request_body).map_err(|e| {
+                qr_error::Error::DeserializeApiGatewayRequest(e, proxy_request_body.clone())
+            })?;
+
+        tracing::trace!("Invoking event handler");
         let (queue_message, response) = self.event_handler.handle_event(&context, &request).await?;
 
         let queue_message_json = serde_json::to_string(&queue_message)
@@ -92,10 +95,10 @@ where
             .map_err(|e| {
                 qr_error::Error::SendSqsMessage(e, queue_message_json, self.queue_url.clone())
             })?;
-        tracing::info!("Successfully wrote message to SQS");
+        tracing::info!("Successfully written message to SQS");
 
-        let response_json =
-            serde_json::to_string(&response).map_err(qr_error::Error::SerializeResponse)?;
+        let response_json = serde_json::to_string(&response)
+            .map_err(qr_error::Error::SerializeApiGatewayResponse)?;
         tracing::trace!("Serialized resonse to JSON: '{}'", response_json);
 
         Ok(response_json)

@@ -66,19 +66,20 @@ where
 
         tracing::info!("WebSocket connection id: '{}'", connection_id);
 
-        let request: Option<<EventHandler as HandleEvent>::Request> = websocket_request
+        let request: Option<EventHandler::Request> = websocket_request
             .body
             .as_ref()
             .map(|body| self.deserialize_request(body))
             .transpose()?;
 
+        tracing::trace!("Invoking event handler");
         let response = self
             .event_handler
             .handle_event(&context, &connection_id, request.as_ref())
             .await?;
 
-        let response_json =
-            serde_json::to_string(&response).map_err(qr_error::Error::SerializeResponse)?;
+        let response_json = serde_json::to_string(&response)
+            .map_err(qr_error::Error::SerializeWebSocketResponse)?;
         tracing::trace!("Serialized response to JSON: '{}'", response_json);
 
         Ok(response_json)
@@ -90,7 +91,7 @@ where
     ) -> qr_error::Result<<EventHandler as HandleEvent>::Request> {
         tracing::trace!("Deserializing request '{body}' from JSON");
         let deserialized_body: Value = serde_json::from_str(&body)
-            .map_err(|e| qr_error::Error::DeserializeRequest(e, body.to_owned()))?;
+            .map_err(|e| qr_error::Error::DeserializeWebSocketRequest(e, body.to_owned()))?;
 
         let Value::Object(mut deserialized_body_object) = deserialized_body else {
             return Err(qr_error::Error::WebSocketRequestNotAnObject(
@@ -103,6 +104,6 @@ where
             .ok_or_else(|| qr_error::Error::WebSocketRequestMissingData(body.to_owned()))?;
 
         serde_json::from_value(data)
-            .map_err(|e| qr_error::Error::DeserializeRequest(e, body.to_owned()))
+            .map_err(|e| qr_error::Error::DeserializeWebSocketRequest(e, body.to_owned()))
     }
 }
