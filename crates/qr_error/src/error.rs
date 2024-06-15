@@ -1,7 +1,8 @@
 use std::result;
 
+use aws_sdk_apigatewaymanagement::operation::post_to_connection::PostToConnectionError;
 use aws_sdk_dynamodb::operation::{
-    delete_item::DeleteItemError, put_item::PutItemError, query::QueryError,
+    delete_item::DeleteItemError, get_item::GetItemError, put_item::PutItemError, query::QueryError,
 };
 use aws_sdk_sqs::operation::send_message::SendMessageError;
 use serde_json::Value;
@@ -90,6 +91,36 @@ pub enum Error {
     #[error("failed deleting result WebSocket from DynamoDB: connection_id='{1}'")]
     DeleteResultWebSocketFromDynamoDB(
         #[source] aws_sdk_dynamodb::error::SdkError<DeleteItemError>,
+        String,
+    ),
+
+    #[error("failed to handle message: {0}")]
+    HandleMessage(String),
+
+    #[error("failed to get result WebSocket from DynamoDB: request_id='{0}'")]
+    GetResultWebSocketFromDynamoDB(
+        #[source] aws_sdk_dynamodb::error::SdkError<GetItemError>,
+        String,
+    ),
+
+    #[error("no result WebSocket found in DynamoDB for request_id='{0}'")]
+    NoResultWebSocketFound(String),
+
+    #[error("missing result WebSocket connection ID for request_id='{0}'")]
+    MissingResultWebSocketConnectionId(String),
+
+    #[error(
+        "unexpected result WebSocket connection ID type for request_id='{0}', expected String"
+    )]
+    UnexpectedResultWebSocketConnectionIdType(String),
+
+    #[error("failed to serialize encode result output message to JSON")]
+    SerializeEncodeResultOutputMessage(#[source] serde_json::Error),
+
+    #[error("failed to post encode result output message '{1}' to WebSocket: connection_id='{2}'")]
+    PostEncodeResultOutputMessageToWebSocket(
+        #[source] aws_sdk_apigatewaymanagement::error::SdkError<PostToConnectionError>,
+        String,
         String,
     ),
 }

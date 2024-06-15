@@ -54,19 +54,15 @@ impl HandleEvent for EventHandler {
             ));
         }
 
-        let Some(items) = query_output.items else {
-            return Err(qr_error::Error::EmptyResultWebSocketQueryItems(
-                connection_id.to_owned(),
-            ));
-        };
+        let items = query_output.items.ok_or_else(|| {
+            qr_error::Error::EmptyResultWebSocketQueryItems(connection_id.to_owned())
+        })?;
 
         let item = &items[0];
 
-        let Some(request_id) = item.get("requestId") else {
-            return Err(qr_error::Error::MissingResultWebSocketRequestId(
-                connection_id.to_owned(),
-            ));
-        };
+        let request_id = item.get("requestId").ok_or_else(|| {
+            qr_error::Error::MissingResultWebSocketRequestId(connection_id.to_owned())
+        })?;
 
         self.dynamodb_client
             .delete_item()

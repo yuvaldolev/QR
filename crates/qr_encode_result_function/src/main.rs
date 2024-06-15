@@ -1,47 +1,33 @@
 use std::env;
 
-use aws_lambda_events::sqs::SqsEventObj;
+use aws_lambda_events::sqs::{SqsBatchResponse, SqsEventObj};
 use lambda_runtime::{tracing, Error, LambdaEvent};
-use qr_encode_result_function::QrEncodeResultRequest;
-
-async fn try_handle(event: LambdaEvent<ApiGatewayProxyRequest>) -> Result<String, Error> {
-    let (proxy_request, _) = event.into_parts();
-
-    let proxy_request_body = proxy_request.body.unwrap();
-
-    let request: QrEncodeRequest = serde_json::from_str(&proxy_request_body)?;
-    let aws_configuration = aws_config::load_from_env().await;
-    let sqs_url = env::var("SQS_URL")?;
-
-    let function = QrEncodeEntryFunction::new(request, aws_configuration, sqs_url);
-    let response = function.run().await?;
-
-    let response_json = serde_json::to_string(&response)?;
-
-    Ok(response_json)
-}
+use qr_aws::functions::sqs_handler::Function;
+use qr_encode_result_function::MessageHandlerFactory;
+use serde_json::Value;
 
 async fn function_handler(
-    event: LambdaEvent<SqsEventObj<QrEncodeResultRequest>>,
-) -> Result<(), Error> {
-    let (status_code, body) = match try_handle(event).await {
-        Ok(response) => (200, response),
-        Err(e) => {
-            tracing::error!("Failed to handle request: {e}");
-            (500, String::from("Internal Server Error"))
-        }
-    };
+    event: LambdaEvent<SqsEventObj<Value>>,
+) -> Result<SqsBatchResponse, Error> {
+    let table_name =
+        env::var("TABLE_NAME").expect("environment variable `TABLE_NAME` should be set");
+    let web_socket_api_endpoint = env::var("WEB_SOCKET_API_ENDPOINT")
+        .expect("environment variable `WEB_SOCKET_API_ENDPOINT` should be set");
 
-    let mut headers = HeaderMap::new();
-    headers.insert("content-type", "application/json".parse().unwrap());
+    let dynamodb_aws_configuration = aws_config::load_from_env().await;
+    let api_gateway_management_aws_configuration = aws_config::from_env()
+        .endpoint_url(web_socket_api_endpoint)
+        .load()
+        .await;
 
-    Ok(ApiGatewayProxyResponse {
-        status_code,
-        multi_value_headers: headers.clone(),
-        is_base64_encoded: false,
-        body: Some(Body::Text(body)),
-        headers,
-    })
+    let function = Function::new(MessageHandlerFactory::new(
+        &dynamodb_aws_configuration,
+        &api_gateway_management_aws_configuration,
+        table_name,
+    ));
+    let response = function.run(event).await;
+
+    Ok(response)
 }
 
 #[tokio::main]

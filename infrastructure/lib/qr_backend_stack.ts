@@ -20,6 +20,8 @@ import { LambdaRestApiBuilder } from "./lambda_rest_api_builder";
 import { RustFunctionFactory } from "./rust_function_factory";
 import { WebSocketApiBuilder } from "./web_socket_api_builder";
 import { DynamoDbTableBuilder } from "./dynamo_db_table_builder";
+import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
+import { QueueFactory } from "./queue_factory";
 
 const ENCODE_RESOURCE = "encode";
 const MONITOR_ROUTE = "monitor";
@@ -33,11 +35,13 @@ export class QrBackendStack extends Stack {
   ) {
     super(scope, id, props);
 
-    const encodeEntryQueue = new Queue(this, "QrEncodeEntryQueue", {
-      visibilityTimeout: Duration.seconds(300),
-    });
-
     const rustFunctionFactory = new RustFunctionFactory(this);
+    const queueFactory = new QueueFactory(this);
+
+    const encodeEntryQueue = queueFactory.make(
+      "QrEncodeEntryQueue",
+      Duration.seconds(5),
+    );
 
     const encodeEntryFunction = rustFunctionFactory.make(
       "QrEncodeEntryFunction",
@@ -46,6 +50,7 @@ export class QrBackendStack extends Stack {
         .set("QUEUE_URL", encodeEntryQueue.queueUrl)
         .build(),
     );
+    encodeEntryQueue.grantSendMessages(encodeEntryFunction);
 
     const encodeEntryRestApi = new LambdaRestApiBuilder(
       this,
@@ -55,8 +60,6 @@ export class QrBackendStack extends Stack {
     )
       .resource(ENCODE_RESOURCE, "POST")
       .build();
-
-    encodeEntryQueue.grantSendMessages(encodeEntryFunction);
 
     const resultWebSocketTable = new DynamoDbTableBuilder(
       this,
@@ -82,6 +85,27 @@ export class QrBackendStack extends Stack {
       rustFunctionFactory,
       resultWebSocketTable,
     );
+
+    const encodeResultFunction = rustFunctionFactory.make(
+      "QrEncodeResultFunction",
+      "qr_encode_result_function",
+      new FunctionEnvironmentBuilder(environment)
+        .set("TABLE_NAME", resultWebSocketTable.tableName)
+        .set(
+          "WEB_SOCKET_API_ENDPOINT",
+          `https://${resultWebSocketApi.apiId}.execute-api.${resultWebSocketApi.env.region}.amazonaws.com/${environment}`,
+        )
+        .build(),
+    );
+    encodeEntryQueue.grantConsumeMessages(encodeResultFunction);
+    encodeResultFunction.addEventSource(
+      new SqsEventSource(encodeEntryQueue, {
+        batchSize: 10,
+        reportBatchItemFailures: true,
+      }),
+    );
+    resultWebSocketTable.grantReadData(encodeResultFunction);
+    resultWebSocketApi.grantManageConnections(encodeResultFunction);
 
     new CfnOutput(this, "encodeApiUrl", {
       value: `${encodeEntryRestApi.url}${ENCODE_RESOURCE}`,
@@ -110,7 +134,6 @@ export class QrBackendStack extends Stack {
         .set("TABLE_NAME", resultWebSocketTable.tableName)
         .build(),
     );
-
     resultWebSocketTable.grantReadWriteData(disconnectFunction);
 
     const monitorFunction = rustFunctionFactory.make(
@@ -120,7 +143,6 @@ export class QrBackendStack extends Stack {
         .set("TABLE_NAME", resultWebSocketTable.tableName)
         .build(),
     );
-
     resultWebSocketTable.grantWriteData(monitorFunction);
 
     return new WebSocketApiBuilder(

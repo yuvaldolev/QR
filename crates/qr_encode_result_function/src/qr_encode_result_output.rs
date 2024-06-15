@@ -3,18 +3,18 @@ use std::fmt::{self, Display, Formatter};
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize)]
-pub struct QrEncodeResultResponse {
+pub struct QrEncodeResultOutput {
     data: String,
 }
 
-impl QrEncodeResultResponse {
+impl QrEncodeResultOutput {
     pub fn new(data: String) -> Self {
         Self { data }
     }
 }
 
-impl Display for QrEncodeResultResponse {
+impl Display for QrEncodeResultOutput {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(f, "QrEncodeResultResponse {{ data: {} }}", self.data)
+        write!(f, "QrEncodeResultOutput {{ data: {} }}", self.data)
     }
 }

@@ -8,7 +8,7 @@ pub trait HandleMessage {
     async fn handle_message(
         &self,
         context: &Context,
-        message_id: &str,
+        id: &str,
         message: Self::Message,
     ) -> qr_error::Result<()>;
 }

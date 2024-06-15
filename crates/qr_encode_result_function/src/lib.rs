@@ -1,7 +1,7 @@
-// mod qr_encode_result_function;
-mod qr_encode_result_request;
-mod qr_encode_result_response;
+mod message_handler;
+mod message_handler_factory;
+mod qr_encode_result_input;
+mod qr_encode_result_output;
 
-// pub use qr_encode_result_function::QrEncodeEntryFunction;
-pub use qr_encode_result_request::QrEncodeResultRequest;
-pub use qr_encode_result_response::QrEncodeResultResponse;
+pub use message_handler_factory::MessageHandlerFactory;
+pub use qr_encode_result_input::QrEncodeResultInput;
