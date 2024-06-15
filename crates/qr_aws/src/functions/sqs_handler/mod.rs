@@ -4,7 +4,6 @@ mod make_message_handler;
 pub use handle_message::HandleMessage;
 pub use make_message_handler::MakeMessageHandler;
 
-use aws_config::SdkConfig;
 use aws_lambda_events::sqs::{BatchItemFailure, SqsBatchResponse, SqsEventObj, SqsMessageObj};
 use futures::future;
 use lambda_runtime::{tracing, Context, LambdaEvent};
@@ -12,16 +11,12 @@ use serde_json::Value;
 use tokio::task::JoinHandle;
 
 pub struct Function<MessageHandlerFactory> {
-    output_queue_url: String,
     message_handler_factory: MessageHandlerFactory,
-    sqs_client: aws_sdk_sqs::Client,
 }
 
 struct HandleEventArguments<MessageHandler> {
-    output_queue_url: String,
-    sqs_client: aws_sdk_sqs::Client,
     context: Context,
-    input_message: SqsMessageObj<Value>,
+    message: SqsMessageObj<Value>,
     message_handler: MessageHandler,
 }
 
@@ -29,15 +24,9 @@ impl<MessageHandlerFactory> Function<MessageHandlerFactory>
 where
     MessageHandlerFactory: MakeMessageHandler,
 {
-    pub fn new(
-        aws_configuration: &SdkConfig,
-        output_queue_url: String,
-        message_handler_factory: MessageHandlerFactory,
-    ) -> Self {
+    pub fn new(message_handler_factory: MessageHandlerFactory) -> Self {
         Self {
-            output_queue_url,
             message_handler_factory,
-            sqs_client: aws_sdk_sqs::Client::new(&aws_configuration),
         }
     }
 
@@ -51,10 +40,8 @@ where
             .into_iter()
             .map(|message| {
                 Self::create_task(HandleEventArguments {
-                    output_queue_url: self.output_queue_url.clone(),
-                    sqs_client: self.sqs_client.clone(),
                     context: context.clone(),
-                    input_message: message,
+                    message,
                     message_handler: self.message_handler_factory.make_message_handler(),
                 })
             })
@@ -102,11 +89,7 @@ where
     fn create_task(
         arguments: HandleEventArguments<MessageHandlerFactory::MessageHandler>,
     ) -> (String, JoinHandle<qr_error::Result<()>>) {
-        let id = arguments
-            .input_message
-            .message_id
-            .clone()
-            .unwrap_or_default();
+        let id = arguments.message.message_id.clone().unwrap_or_default();
         let task = tokio::spawn(async move { Self::handle_message(arguments).await });
 
         (id, task)
@@ -115,51 +98,23 @@ where
     async fn handle_message(
         arguments: HandleEventArguments<MessageHandlerFactory::MessageHandler>,
     ) -> qr_error::Result<()> {
-        let input_message_id = arguments.input_message.message_id.unwrap_or_default();
-        tracing::info!("Handling SQS message: '{}'", input_message_id);
+        let message_id = arguments.message.message_id.unwrap_or_default();
+        tracing::info!("Handling SQS message: '{}'", message_id);
 
         tracing::trace!(
-            "Deserializing input message body '{}' from JSON",
-            arguments.input_message.body
+            "Deserializing message body '{}' from JSON",
+            arguments.message.body
         );
-        let input_message: <MessageHandlerFactory::MessageHandler as HandleMessage>::InputMessage =
-            serde_json::from_value(arguments.input_message.body.clone()).map_err(|e| {
-                qr_error::Error::DeserializeSqsInputMessage(e, arguments.input_message.body)
+        let message: <MessageHandlerFactory::MessageHandler as HandleMessage>::Message =
+            serde_json::from_value(arguments.message.body.clone()).map_err(|e| {
+                qr_error::Error::DeserializeSqsInputMessage(e, arguments.message.body)
             })?;
 
         tracing::trace!("Invoking message handler");
-        let output_message = arguments
-            .message_handler
-            .handle_message(&arguments.context, &input_message_id, input_message)
-            .await?;
-
-        let output_message_json = serde_json::to_string(&output_message)
-            .map_err(qr_error::Error::SerializeSqsOutputMessage)?;
-        tracing::trace!(
-            "Serialized output message to JSON: '{}'",
-            output_message_json
-        );
-
-        tracing::info!(
-            "Writing message '{}' to SQS '{}",
-            output_message_json,
-            arguments.output_queue_url
-        );
         arguments
-            .sqs_client
-            .send_message()
-            .queue_url(&arguments.output_queue_url)
-            .message_body(&output_message_json)
-            .send()
-            .await
-            .map_err(|e| {
-                qr_error::Error::SendSqsMessage(
-                    e,
-                    output_message_json,
-                    arguments.output_queue_url.clone(),
-                )
-            })?;
-        tracing::info!("Successfully written message to SQS");
+            .message_handler
+            .handle_message(&arguments.context, &message_id, message)
+            .await?;
 
         Ok(())
     }

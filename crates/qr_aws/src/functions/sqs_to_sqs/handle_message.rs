@@ -1,14 +1,15 @@
 use lambda_runtime::Context;
 use serde::{de::DeserializeOwned, Serialize};
 
+#[async_trait::async_trait]
 pub trait HandleMessage {
     type InputMessage: DeserializeOwned;
     type OutputMessage: Serialize + Send;
 
-    fn handle_message(
+    async fn handle_message(
         &self,
         context: &Context,
         input_message_id: &str,
         input_message: Self::InputMessage,
-    ) -> Self::OutputMessage;
+    ) -> qr_error::Result<Self::OutputMessage>;
 }
