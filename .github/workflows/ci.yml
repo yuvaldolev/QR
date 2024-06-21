@@ -53,4 +53,5 @@ jobs:
       - name: Build CLI Frontend
         env:
           ENCODE_API_URL: ""
+          RESULT_WEB_SOCKET_API_URL: ""
         run: cargo build -p qr_cli --release
