@@ -9,6 +9,10 @@ clap = { version = "4.5.4", features = ["derive"] }
 futures-util = { version = "0.3.30", features = ["sink"] }
 qr_encoder = { path = "../qr_encoder" }
 qr_encode_entry_function = { path = "../qr_encode_entry_function" }
+qr_encode_result_function = { path = "../qr_encode_result_function" }
+qr_result_web_socket_monitor_function = { path = "../qr_result_web_socket_monitor_function" }
 reqwest = { version = "0.12.4", features = ["json"] }
+serde = { version = "1.0.202", features = ["derive"] }
+serde_json = "1.0.117"
 tokio = { version = "1.38.0", features = ["full"] }
-tokio-tungstenite = "0.22.0"
+tokio-tungstenite = { version = "0.22.0", features = ["native-tls"] }
