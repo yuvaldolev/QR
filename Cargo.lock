@@ -1711,8 +1711,12 @@ dependencies = [
  "clap",
  "futures-util",
  "qr_encode_entry_function",
+ "qr_encode_result_function",
  "qr_encoder",
+ "qr_result_web_socket_monitor_function",
  "reqwest",
+ "serde",
+ "serde_json",
  "tokio",
  "tokio-tungstenite",
 ]
@@ -2515,7 +2519,9 @@ checksum = "d46baf930138837d65e25e3b33be49c9228579a6135dbf756b5cb9e4283e7cef"
 dependencies = [
  "futures-util",
  "log",
+ "native-tls",
  "tokio",
+ "tokio-native-tls",
  "tungstenite",
 ]
 
@@ -2639,6 +2645,7 @@ dependencies = [
  "http 1.1.0",
  "httparse",
  "log",
+ "native-tls",
  "rand",
  "sha1",
  "thiserror",

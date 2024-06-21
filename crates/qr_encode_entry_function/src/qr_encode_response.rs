@@ -9,4 +9,8 @@ impl QrEncodeResponse {
     pub fn new(request_id: String) -> Self {
         QrEncodeResponse { request_id }
     }
+
+    pub fn get_request_id(&self) -> &str {
+        &self.request_id
+    }
 }

@@ -11,6 +11,10 @@ impl QrEncodeResultOutput {
     pub fn new(data: String) -> Self {
         Self { data }
     }
+
+    pub fn get_data(&self) -> &str {
+        &self.data
+    }
 }
 
 impl Display for QrEncodeResultOutput {

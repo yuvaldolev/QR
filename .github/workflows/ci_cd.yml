@@ -12,6 +12,7 @@ env:
   AWS_REGION: eu-central-1
   STACK_BASE_NAME: "QrBackendStack"
   ENCODE_API_URL_OUTPUT_KEY: "encodeApiUrl"
+  RESULT_WEB_SOCKET_API_URL_OUTPUT_KEY: "resultWebSocketApiUrl"
 
 permissions:
   id-token: write
@@ -87,6 +88,23 @@ jobs:
           name: qr_encode_api_url
           path: encode_api_url.txt
 
+      - name: Retrieve Result WebSocket API URL
+        run: |
+          RESULT_WEB_SOCKET_API_URL=$(aws cloudformation describe-stacks --stack-name ${{ env.STACK_NAME }} | jq '.Stacks[0].Outputs | .[] | select(.OutputKey == "${{ env.RESULT_WEB_SOCKET_API_URL_OUTPUT_KEY }}") | .OutputValue')
+          echo "RESULT_WEB_SOCKET_API_URL=$RESULT_WEB_SOCKET_API_URL" >> $GITHUB_ENV
+
+      - name: Print Result WebSocket API URL
+        run: echo "Result WebSocket API URL - ${{ env.RESULT_WEB_SOCKET_API_URL }}"
+
+      - name: Save Result WebSocket API URL
+        run: echo "${{ env.RESULT_WEB_SOCKET_API_URL }}" > result_web_socket_api_url.txt
+
+      - name: Upload Result WebSocket API URL
+        uses: actions/upload-artifact@v4
+        with:
+          name: result_web_socket_api_url
+          path: result_web_socket_api_url.txt
+
   build-upload-frontend:
     needs: build-deploy-backend
 
@@ -122,9 +140,20 @@ jobs:
           ENCODE_API_URL=$(cat encode_api_url.txt)
           echo "ENCODE_API_URL=$ENCODE_API_URL" >> $GITHUB_ENV
 
+      - name: Download Result WebSocket API URL
+        uses: actions/download-artifact@v4
+        with:
+          name: result_web_socket_api_url
+
+      - name: Read Result WebSocket API URL into environment
+        run: |
+          RESULT_WEB_SOCKET_API_URL=$(cat result_web_socket_api_url.txt)
+          echo "RESULT_WEB_SOCKET_API_URL=$RESULT_WEB_SOCKET_API_URL" >> $GITHUB_ENV
+
       - name: Build CLI Frontend
         env:
           ENCODE_API_URL: ${{ env.ENCODE_API_URL }}
+          RESULT_WEB_SOCKET_API_URL: ${{ env.RESULT_WEB_SOCKET_API_URL }}
         run: cargo build -p qr_cli --release
 
       - name: Prepare CLI Frontend for Upload

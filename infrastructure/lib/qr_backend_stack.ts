@@ -40,7 +40,7 @@ export class QrBackendStack extends Stack {
 
     const encodeEntryQueue = queueFactory.make(
       "QrEncodeEntryQueue",
-      Duration.seconds(5),
+      Duration.seconds(1),
     );
 
     const encodeEntryFunction = rustFunctionFactory.make(
