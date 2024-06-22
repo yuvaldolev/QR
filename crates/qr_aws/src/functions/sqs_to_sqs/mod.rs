@@ -115,8 +115,15 @@ where
     async fn handle_message(
         arguments: HandleEventArguments<MessageHandlerFactory::MessageHandler>,
     ) -> qr_error::Result<()> {
-        let input_message_id = arguments.input_message.message_id.unwrap_or_default();
-        tracing::info!("Handling SQS message: '{}'", input_message_id);
+        let input_message_id = arguments
+            .input_message
+            .message_id
+            .ok_or(qr_error::Error::MissingMessageId)?;
+        let input_message_receipt_handle =
+            arguments.input_message.receipt_handle.ok_or_else(|| {
+                qr_error::Error::MissingMessageReceiptHandle(input_message_id.clone())
+            })?;
+        tracing::info!("Handling SQS message: id='{input_message_id}', receipt_handle='{input_message_receipt_handle}'");
 
         tracing::trace!(
             "Deserializing input message body '{}' from JSON",
@@ -130,7 +137,12 @@ where
         tracing::trace!("Invoking message handler");
         let output_message = arguments
             .message_handler
-            .handle_message(&arguments.context, &input_message_id, input_message)
+            .handle_message(
+                &arguments.context,
+                &input_message_id,
+                &input_message_receipt_handle,
+                input_message,
+            )
             .await?;
 
         let output_message_json = serde_json::to_string(&output_message)

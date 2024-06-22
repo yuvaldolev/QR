@@ -1746,6 +1746,7 @@ dependencies = [
  "aws-config",
  "aws-sdk-apigatewaymanagement",
  "aws-sdk-dynamodb",
+ "aws-sdk-sqs",
  "aws_lambda_events",
  "lambda_runtime",
  "qr_aws",

@@ -98,8 +98,17 @@ where
     async fn handle_message(
         arguments: HandleEventArguments<MessageHandlerFactory::MessageHandler>,
     ) -> qr_error::Result<()> {
-        let message_id = arguments.message.message_id.unwrap_or_default();
-        tracing::info!("Handling SQS message: '{}'", message_id);
+        let message_id = arguments
+            .message
+            .message_id
+            .ok_or(qr_error::Error::MissingMessageId)?;
+        let message_receipt_handle = arguments
+            .message
+            .receipt_handle
+            .ok_or_else(|| qr_error::Error::MissingMessageReceiptHandle(message_id.clone()))?;
+        tracing::info!(
+            "Handling SQS message: id='{message_id}', receipt_handle='{message_receipt_handle}'"
+        );
 
         tracing::trace!(
             "Deserializing message body '{}' from JSON",
@@ -113,7 +122,12 @@ where
         tracing::trace!("Invoking message handler");
         arguments
             .message_handler
-            .handle_message(&arguments.context, &message_id, message)
+            .handle_message(
+                &arguments.context,
+                &message_id,
+                &message_receipt_handle,
+                message,
+            )
             .await?;
 
         Ok(())

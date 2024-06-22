@@ -11,7 +11,6 @@ import {
   ProjectionType,
   TableV2,
 } from "aws-cdk-lib/aws-dynamodb";
-import { Queue } from "aws-cdk-lib/aws-sqs";
 import { Construct } from "constructs";
 
 import { Environment } from "./environment";
@@ -21,7 +20,7 @@ import { RustFunctionFactory } from "./rust_function_factory";
 import { WebSocketApiBuilder } from "./web_socket_api_builder";
 import { DynamoDbTableBuilder } from "./dynamo_db_table_builder";
 import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
-import { QueueFactory } from "./queue_factory";
+import { QueueBuilder } from "./queue_builder";
 
 const ENCODE_RESOURCE = "encode";
 const MONITOR_ROUTE = "monitor";
@@ -36,12 +35,10 @@ export class QrBackendStack extends Stack {
     super(scope, id, props);
 
     const rustFunctionFactory = new RustFunctionFactory(this);
-    const queueFactory = new QueueFactory(this);
 
-    const encodeEntryQueue = queueFactory.make(
-      "QrEncodeEntryQueue",
-      Duration.seconds(1),
-    );
+    const encodeEntryQueue = new QueueBuilder(this, "QrEncodeEntryQueue")
+      .retentionPeriod(Duration.minutes(5))
+      .build();
 
     const encodeEntryFunction = rustFunctionFactory.make(
       "QrEncodeEntryFunction",
@@ -95,6 +92,7 @@ export class QrBackendStack extends Stack {
           "WEB_SOCKET_API_ENDPOINT",
           `https://${resultWebSocketApi.apiId}.execute-api.${resultWebSocketApi.env.region}.amazonaws.com/${environment}`,
         )
+        .set("SOURCE_QUEUE_URL", encodeEntryQueue.queueUrl)
         .build(),
     );
     encodeEntryQueue.grantConsumeMessages(encodeResultFunction);
