@@ -4,7 +4,9 @@ use aws_sdk_apigatewaymanagement::operation::post_to_connection::PostToConnectio
 use aws_sdk_dynamodb::operation::{
     delete_item::DeleteItemError, get_item::GetItemError, put_item::PutItemError, query::QueryError,
 };
-use aws_sdk_sqs::operation::send_message::SendMessageError;
+use aws_sdk_sqs::operation::{
+    change_message_visibility::ChangeMessageVisibilityError, send_message::SendMessageError,
+};
 use serde_json::Value;
 
 #[derive(Debug, thiserror::Error)]
@@ -44,6 +46,13 @@ pub enum Error {
         #[source] aws_sdk_sqs::error::SdkError<SendMessageError>,
         String,
         String,
+    ),
+
+    #[error("failed changing visibility timeout of message '{1}' to '{2}'")]
+    ChangeMessageVisibilityTimeout(
+        #[source] aws_sdk_sqs::error::SdkError<ChangeMessageVisibilityError>,
+        String,
+        i32,
     ),
 
     #[error("no connection ID found in WebSocket request")]
@@ -123,6 +132,12 @@ pub enum Error {
         String,
         String,
     ),
+
+    #[error("missing message ID")]
+    MissingMessageId,
+
+    #[error("message '{0}' is missing receipt handle")]
+    MissingMessageReceiptHandle(String),
 }
 
 pub type Result<T> = result::Result<T, Error>;

@@ -9,6 +9,7 @@ pub trait HandleMessage {
         &self,
         context: &Context,
         id: &str,
+        receipt_handle: &str,
         message: Self::Message,
     ) -> qr_error::Result<()>;
 }

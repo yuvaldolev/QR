@@ -10,6 +10,7 @@ pub trait HandleMessage {
         &self,
         context: &Context,
         input_id: &str,
+        input_receipt_handle: &str,
         input_message: Self::InputMessage,
     ) -> qr_error::Result<Self::OutputMessage>;
 }
